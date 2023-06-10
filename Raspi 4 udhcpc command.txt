@@ -1,0 +1,9 @@
+udhcpc -p /var/run/udhcpc-br-lan.pid -s /lib/netifd/dhcp.script -f -t 0 -i br-lan -x hostname:OpenWrt -C -R -O 121
+
+udhcpc -p /var/run/udhcpc-br-lan.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-lan -x hostname:MssOpenWrt -C -R -O staticroutes
+
+default : udhcpc -t 0 -i br-lan -b -p /var/run/
+
+
+After the loop
+Before the package handling
