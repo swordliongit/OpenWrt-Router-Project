@@ -2,6 +2,8 @@ udhcpc -p /var/run/udhcpc-br-lan.pid -s /lib/netifd/dhcp.script -f -t 0 -i br-la
 
 udhcpc -p /var/run/udhcpc-br-lan.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-lan -x hostname:MssOpenWrt -C -R -O staticroutes
 
+udhcpc -p /var/run/udhcpc-br-guest.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-guest -x hostname:MssOpenWrtGuest -C -R -O staticroutes
+
 default : udhcpc -t 0 -i br-lan -b -p /var/run/
 
 

@@ -11,8 +11,12 @@ PING_IP="8.8.8.8"
 echo "Before killing the current udhcpc" >> /tmp/tracker
 # kill the current udhcpc
 pid=$(pgrep -f "udhcpc -t 0 -i br-lan -b -p /var/run/dhcp-br-lan.pid")
+pid2=$(pgrep -f "udhcpc -p /var/run/udhcpc-br-lan.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-lan -x hostname:MSS5004W-OpenWrt -C -R -O staticroutes &>/dev/null &")
 if [ -n "$pid" ]; then
     kill "$pid"
+fi
+if [ -n "$pid2" ]; then
+    kill "$pid2"
 fi
 echo "After killing the current udhcpc" >> /tmp/tracker
 # dhcp client check block, we have to start the dhcp client if there are no static ips set
