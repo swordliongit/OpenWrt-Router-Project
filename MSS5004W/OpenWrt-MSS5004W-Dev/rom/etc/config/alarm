@@ -1,3 +1,0 @@
-
-config 'general' 'alarm'
-	option 'enable' '0'

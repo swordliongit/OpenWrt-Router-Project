@@ -1,7 +1,0 @@
-config ntpdrift
-	option freq     '0'
-
-config ntpclient
-	option interval 86400	
-	#option count	10
-	#option interface wan
