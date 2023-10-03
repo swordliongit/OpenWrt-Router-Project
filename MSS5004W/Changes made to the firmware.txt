@@ -1,0 +1,8 @@
+
+1 - project_odoo folder in /etc
+2 - new site file in /etc/config
+3 - root password changed in /etc/passwd
+4 - rc.local file now has the init script to install the packages in /etc and setup dhcp client. Also checks if static ip is set or not before launching dhcp client.
+5 - firmware-mod-kit has been modified to move the project_odoo folder, site, network files into the $ROOTFS of the filesystem in the build_firmware.sh
+6 - dhcp server disabled by default
+7 - PassDhcp enabled in wanctl config file

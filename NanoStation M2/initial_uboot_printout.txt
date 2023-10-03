@@ -1,0 +1,195 @@
+U-Boot 1.1.4.2-s594 (Dec  5 2012 - 15:23:07)
+
+Board: Ubiquiti Networks XM board (rev 1.0 e012)
+DRAM:  32 MB
+Flash:  8 MB
+PCIe WLAN Module found (#1).
+Net:   eth0, eth1
+Hit any key to stop autoboot:  0
+## Booting image at 9f050000 ...
+   Image Name:   MIPS OpenWrt Linux-5.10.176
+   Created:      2023-04-27  20:28:15 UTC
+   Image Type:   MIPS Linux Kernel Image (lzma compressed)
+ ze:    1766951 Bytes =  1.7 MB
+   Load Address: 80060000
+   Entry Point:  80060000
+   Verifying Checksum ... OK
+   Uncompressing Kernel Image ... OK
+
+Starting kernel ...
+
+[    0.000000] Linux version 5.10.176 (builder@buildhost) (mips-openwrt-linux-musl-gcc (OpenWrt GCC 11.2.0 r20134-5f15225c1e) 11.2.0, GNU ld (GNU Binutils) 2.37) #0 Thu Apr 27 20:28:15 2023
+[    0.000000] printk: bootconsole [early0] enabled
+[    0.000000] CPU0 revision is: 00019374 (MIPS 24Kc)
+[    0.000000] MIPS: machine is Ubiquiti Nanostation M (XM)
+[    0.000000] SoC: Atheros AR7241 rev 1
+[    0.000000] Initrd not found or empty - disabling initrd
+[    0.000000] Primary instruction cache 64kB, VIPT, 4-way, linesize 32 bytes.
+[    0.000000] Primary data cache 32kB, 4-way, VIPT, cache aliases, linesize 32 bytes
+[    0.000000] Zone ranges:
+[    0.000000]   Normal   [mem 0x0000000000000000-0x0000000001ffffff]
+[    0.000000] Movable zone start for each node
+[    0.000000] Early memory node ranges
+[    0.000000]   node   0: [mem 0x0000000000000000-0x0000000001ffffff]
+[    0.000000] Initmem setup node 0 [mem 0x0000000000000000-0x0000000001ffffff]
+[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 8128
+[    0.000000] Kernel command line: console=ttyS0,115200 rootfstype=squashfs,jffs2
+[    0.000000] Dentry cache hash table entries: 4096 (order: 2, 16384 bytes, linear)
+[    0.000000] Inode-cache hash table entries: 2048 (order: 1, 8192 bytes, linear)
+[    0.000000] Writing ErrCtl register=00000000
+[    0.000000] Readback ErrCtl register=00000000
+[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.000000] Memory: 25372K/32768K available (4368K kernel code, 558K rwdata, 672K rodata, 1240K init, 199K bss, 7396K reserved, 0K cma-reserved)
+[    0.000000] SLUB: HWalign=32, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+[    0.000000] NR_IRQS: 51
+[    0.000000] CPU clock: 390.000 MHz
+[    0.000000] clocksource: MIPS: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 9801335621 ns
+[    0.000016] sched_clock: 32 bits at 195MHz, resolution 5ns, wraps every 11012737021ns
+[    0.008015] Calibrating delay loop... 259.27 BogoMIPS (lpj=1296384)
+[    0.084205] pid_max: default: 32768 minimum: 301
+[    0.089060] Mount-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.096365] Mountpoint-cache hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.106989] dyndbg: Ignore empty _ddebug table in a CONFIG_DYNAMIC_DEBUG_CORE build
+[    0.118344] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.128187] futex hash table entries: 256 (order: -1, 3072 bytes, linear)
+[    0.135038] pinctrl core: initialized pinctrl subsystem
+[    0.147120] NET: Registered protocol family 16
+[    0.152782] thermal_sys: Registered thermal governor 'step_wise'
+[    0.227726] clocksource: Switched to clocksource MIPS
+[ear)
+[    0.262674] TCP established hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.270346] TCP bind hash table entries: 1024 (order: 0, 4096 bytes, linear)
+[    0.277379] TCP: Hash tables configured (established 1024 bind 1024)
+[    0.283966] UDP hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.290570] UDP-Lite hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.298019] NET: Registered protocol family 1
+[    0.302405] PCI: CLS 0 bytes, default 32
+[    0.316122] workingset: timestamp_bits=30 max_order=13 bucket_order=0
+[    0.329452] squashfs: version 4.0 (2009/01/31) Phillip Lougher
+[    0.335264] jffs2: version 2.2 (NAND) (SUMMARY) (LZMA) (RTIME) (CMODE_PRIORITY) (c) 2001-2006 Red Hat, Inc.
+[    0.347967] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 252)
+[    0.356832] pinctrl-single 18040028.pinmux: 64 pins, size 8
+[    0.364014] Serial: 8250/16550 driver, 16 ports, IRQ sharing enabled
+[    0.374557] printk: console [ttyS0] disabled
+[    0.379033] 18020000.uart: ttyS0 at MMIO 0x18020000 (irq = 9, base_baud = 12187500) is a 16550A
+[    0.387763] printk: console [ttyS0] enabled
+[    0.387763] printk: console [ttyS0] enabled
+[    0.396149] printk: bootconsole [early0] disabled
+[    0.396149] printk: bootconsole [early0] disabled
+[    0.432909] spi-nor spi0.0: mx25l6405d (8192 Kbytes)
+[    0.438101] 6 fixed-partitions partitions found on MTD device spi0.0ahb/spi@1f000000/flash@0/partitions
+[    0.451296] OF: Bad cell count for /ahb/spi@1f000000/flash@0/partitions
+[    0.458835] OF: Bad cell count for /ahb/spi@1f000000/flash@0/partitions
+[    0.465522] OF: Bad cell count for /ahb/spi@1f000000/flash@0/partitions
+[    0.473414] Creating 6 MTD partitions on "spi0.0":
+[    0.478317] 0x000000000000-0x000000040000 : "u-boot"
+[    0.490695] 0x000000040000-0x000000050000 : "u-boot-env"
+[    0.497658] 0x000000050000-0x0000007a0000 : "firmware"
+[    0.507342] 2 uimage-fw partitions found on MTD device firmware
+[    0.513380] Creating 2 MTD partitions on "firmware":
+[    0.518422] 0x000000000000-0x0000001b0000 : "kernel"
+[    0.526130] 0x0000001b0000-0x000000750000 : "rootfs"
+[    0.532609] mtd: setting mtd4 (rootfs) as root device
+[    0.539267] 1 squashfs-split partitions found on MTD device rootfs
+[    0.545518] 0x000000560000-0x000000750000 : "rootfs_data"
+[    0.552543] 0x0000007a0000-0x0000007b0000 : "board_config"
+[    0.562068] 0x0000007b0000-0x0000007f0000 : "cfg"
+[    0.568455] 0x0000007f0000-0x000000800000 : "art"
+[    0.938878] ag71xx 19000000.eth: Could not connect to PHY device. Deferring probe.
+[    1.624606] switch0: Atheros AR724X/AR933X built-in rev. 2 switch registered on mdio.0
+[    1.674548] ag71xx 1a000000.eth: connected to PHY at fixed-0:00 [uid=00000000, driver=Generic PHY]
+[    1.684735] eth0: Atheros AG71xx at 0xba000000, irq 5, mode: gmii
+[    1.694938] NET: Registered protocol family 10
+[    1.712470] Segment Routing with IPv6
+[    1.716379] NET: Registered protocol family 17
+[    1.721040] bridge: filtering via arp/ip/ip6tables is no longer available by default. Update your scripts to load br_netfilter if you need this.
+[    1.734554] 8021q: 802.1Q VLAN Support v1.8
+[    1.740330] PCI host bridge /ahb/apb/pcie-controller@180c0000 ranges:
+[    1.746870]  MEM 0x0000000010000000..0x0000000013ffffff
+[    1.752213]   IO 0x0000000000000000..0x0000000000000000
+[    1.757838] PCI host bridge to bus 0000:00
+[    1.761982] pci_bus 0000:00: root bus resource [mem 0x10000000-0x13ffffff]
+[    1.768940] pci_bus 0000:00: root bus resource [io  0x0000]
+[    1.774545] pci_bus 0000:00: root bus resource [??? 0x00000000 flags 0x0]
+[    1.781390] pci_bus 0000:00: No busn resource found for root bus, will use [bus 00-ff]
+[    1.789441] pci 0000:00:00.0: [168c:002a] type 00 class 0x028000
+[    1.795528] pci 0000:00:00.0: reg 0x10: [mem 0x10000000-0x1000ffff 64bit]
+[    1.802559] pci 0000:00:00.0: supports D1
+[    1.806593] pci 0000:00:00.0: PME# supported from D0 D1 D3hot
+[    1.814291] pci_bus 0000:00: busn_res: [bus 00-ff] end is updated to 00
+[    1.821028] pci 0em 0x10000000-0x1000ffff 64bit]
+[    2.248337] ag71xx 19000000.eth: connected to PHY at mdio.0:1f:04 [uid=004dd041, driver=Qualcomm Atheros AR9331 built-in PHY]
+[    2.261308] eth1: Atheros AG71xx at 0xb9000000, irq 4, mode: mii
+[    2.295622] VFS: Mounted root (squashfs filesystem) readonly on device 31:4.
+[    2.313287] Freeing unused kernel memory: 1240K
+[    2.317888] This architecture does not have kernel memory protection.
+[    2.324371] Run /sbin/init as init process
+[    3.740448] init: Console is alive
+[    3.744622] init: - watchdog -
+[    3.749393] init: Watchdog has previously reset the system
+[    6.054266] kmodloader: loading kernel modules from /etc/modules-boot.d/*
+[    6.147620] usbcore: registered new interface driver usbfs
+[    6.153384] usbcore: registered new interface driver hub
+[    6.158909] usbcore: registered new device driver usb
+[    6.177476] ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+[    6.186823] fsl-ehci: Freescale EHCI Host controller driver
+[    6.196300] ehci-platform: EHCI generic platform driver
+[    6.210282] ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+[    6.218855] ohci-platform: OHCI generic platform driver
+[    6.226984] kmodloader: done loading kernel modules from /etc/modules-boot.d/*
+[    6.237554] init: - preinit -
+[    8.087348] random: jshn: uninitialized urandom read (4 bytes read)
+[    8.238418] random: jshn: uninitialized urandom read (4 bytes read)
+cat: can't open '/sys/class/ieee80211/phy0/macaddress': No such file or directory
+[    8.395137] random: jshn: uninitialized urandom read (4 bytes read)
+[    9.186793] random: procd: uninitialized urandom read (4 bytes read)
+Press the [f] key and hit [enter] to enter failsafe mode
+Press the [1], [2], [3] or [4] key and hit [enter] to select the debug level
+[   11.139585] eth1: link up (100Mbps/Full duplex)
+[   11.144198] IPv6: ADDRCONF(NETDEV_CHANGE): eth1: link becomes ready
+[   13.655308] jffs2: notice: (415) jffs2_build_xattr_subsystem: complete building xattr subsystem, 18 of xdatum (0 unchecked, 9 orphan) and 20 of xref (9 dead, 0 orphan) found.
+[   13.676631] mount_root: switching to jffs2 overlay
+[   13.692137] overlayfs: upper fs does not support tmpfile.
+[   13.713903] urandom-seed: Seeding with /etc/urandom.seed
+[   13.951485] eth1: link down
+[   13.975761] procd: - early -
+[   13.980328] procd: - watchdog -
+[   13.984054] procd: Watchdog has previously reset the system
+[   14.777213] procd: - watchdog -
+[   14.780645] procd: Watchdog has previously reset the system
+[   14.789413] procd: - ubus -
+[   14.908726] random: ubusd: uninitialized urandom read (4 bytes read)
+[   14.919762] random: ubusd: und)
+[   14.927064] random: ubusd: uninitialized urandom read (4 bytes read)
+[   14.939176] procd: - init -
+Please press Enter to activate this console.
+[   16.467347] random: jshn: uninitialized urandom read (4 bytes read)
+[   16.576886] random: ubusd: uninitialized urandom read (4 bytes read)
+[   16.598105] random: ubus: uninitialized urandom read (4 bytes read)
+[   16.798596] kmodloader: loading kernel modules from /etc/modules.d/*
+[   17.764687] Loading modules backported from Linux version v5.15.92-0-ge515b9902f5f
+[   17.772395] Backport generated by backports.git v5.15.92-1-0-gdfe0f60c
+[   17.799538] urngd: v1.0.2 started.
+[   18.632449] PPP generic driver version 2.4.2
+[   18.650617] NET: Registered protocol family 24
+[   18.881622] random: crng init done
+[   18.885068] random: 22 urandom warning(s) missed due to ratelimiting
+[   18.913315] ath: phy0: Ignoring endianness difference in EEPROM magic bytes.
+[   18.942790] ieee80211 phy0: Atheros AR9280 Rev:2 mem=0xb0000000, irq=13
+[   19.038481] kmodloader: done loading kernel modules from /etc/modules.d/*
+[   49.028618] br-lan: port 1(eth1) entered blocking state
+[   49.033893] br-lan: port 1(eth1) entered disabled state
+[   49.039733] device eth1 entered promiscuous mode
+[   49.148719] eth0: link up (1000Mbps/Full duplex)
+[   49.178122] IPv6: ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+[   51.070950] eth1: link up (100Mbps/Full duplex)
+[   51.075591] br-lan: port 1(eth1) entered blocking state
+[   51.080938] br-lan: port 1(eth1) entered forwarding state
+[   51.171217] IPv6: ADDRCONF(NETDEV_CHANGE): br-lan: link becomes ready
+[   51.178258] IPv6: ADDRCONF(NETDEV_CHANGE): eth1.5: link becomes ready
+[   62.964614] br-lan: port 2(wlan0) entered blocking state
+[   62.970054] br-lan: port 2(wlan0) entered disabled state
+[   62.975981] device wlan0 entered promiscuous mode
+[   63.087015] IPv6: ADDRCONF(NETDEV_CHANGE): wlan0: link becomes ready
+[   63.094048] br-lan: port 2(wlan0) entered blocking state
+[   63.099465] br-lan: port 2(wlan0) entered forwarding state

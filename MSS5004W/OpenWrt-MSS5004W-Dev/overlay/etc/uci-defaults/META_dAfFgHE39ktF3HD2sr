@@ -1,0 +1,8 @@
+D inittab-console-fixup
+D leds
+D luci-i18n-chinese
+D luci-i18n-english
+D luci-theme-01-openwrt
+D luci-theme-40-r3000_base
+D luci-userfw
+D network

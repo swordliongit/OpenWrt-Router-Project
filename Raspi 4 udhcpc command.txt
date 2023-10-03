@@ -1,11 +1,159 @@
 udhcpc -p /var/run/udhcpc-br-lan.pid -s /lib/netifd/dhcp.script -f -t 0 -i br-lan -x hostname:OpenWrt -C -R -O 121
 
 udhcpc -p /var/run/udhcpc-br-lan.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-lan -x hostname:MssOpenWrt -C -R -O staticroutes
+udhcpc -p /var/run/udhcpc-br-vlan5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-vlan5 -x hostname:MssOpenWrt -C -R -O staticroutes
+udhcpc -p /var/run/udhcpc-br-eth_guest.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-eth_guest -x hostname:MssOpenWrt -C -R -O staticroutes
+udhcpc -p /var/run/udhcpc-br-guest.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-guest -x hostname:MssOpenWrt -C -R -O staticroutes
+udhcpc -p /var/run/udhcpc-eth1_0.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0 -x hostname:MssOpenWrt -C -R -O staticroutes &
+udhcpc -p /var/run/udhcpc-eth1_0.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0.5 -x hostname:OpenWrt -C -R -O staticroutes &
+
+udhcpc -p /var/run/udhcpc-eth1_3.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_3 -x hostname:MssOpenWrt -C -R -O staticroutes 
+udhcpc -p /var/run/udhcpc-eth1_3.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_3.5 -x hostname:MssOpenWrt -C -R -O staticroutes 
+udhcpc -p /var/run/udhcpc-eth0.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth0.5 -x hostname:MssOpenWrt -C -R -O staticroutes 
+udhcpc -p /var/run/udhcpc-ra0.pid -s /usr/share/udhcpc/default.script -f -t 0 -i ra0 -x hostname:MssOpenWrt -C -R -O staticroutes 
+
+ip link add link eth1 name eth1.5 type vlan id 5
+ip link set dev eth1.5 up
+
+udhcpc -p /var/run/udhcpc-eth0.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth0.5 -x hostname:MssOpenWrt -C -R -O staticroutes &
 
 udhcpc -p /var/run/udhcpc-br-guest.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-guest -x hostname:MssOpenWrtGuest -C -R -O staticroutes
 
+For vlan on Raspi 4 OpenWrt:
+udhcpc -p /var/run/udhcpc-eth0.5.pid -s /lib/netifd/dhcp.script -f -t 0 -i eth0.5 -x hostname:OpenWrt -C -R -O 121
+
+iptables -A user_Default ACCEPT
+
+udhcpc -p /var/run/udhcpc-br-wan.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-wan -x hostname:OpenWrt -C -R -O staticroutes
+udhcpc -p /var/run/udhcpc-eth1.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1.5 -x hostname:OpenWrt -C -R -O staticroutes
+udhcpc -p /var/run/udhcpc-eth0.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth0.5 -x hostname:OpenWrt -C -R -O staticroutes
+
+
+udhcpc -p /var/run/udhcpc-eth1_3.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_3.5 -x hostname:OpenWrt -C -R -O staticroutes
+
+udhcpc -p /var/run/udhcpc-br-vlan5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-vlan5 -x hostname:OpenWrt -C -R -O staticroutes
+
 default : udhcpc -t 0 -i br-lan -b -p /var/run/
 
+ULTI:
+
+udhcpc -p /var/run/udhcpc-br-guest.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-guest -x hostname:OpenWrt -C -R -O staticroutes &
+udhcpc -p /var/run/udhcpc-eth1_0.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0.5 -x hostname:OpenWrt -C -R -O staticroutes &
+udhcpc -p /var/run/udhcpc-eth1_0.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0 -x hostname:OpenWrt -C -R -O staticroutes &
+
+udhcpc -p /var/run/udhcpc-eth1_0.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0 -x hostname:OpenWrt -C -R -O staticroutes &
+udhcpc -p /var/run/udhcpc-eth1_0.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0.5 -x hostname:OpenWrt -C -R -O staticroutes &
+udhcpc -p /var/run/udhcpc-br-lan.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-lan -x hostname:OpenWrt -C -R -O staticroutes &
+udhcpc -p /var/run/udhcpc-br-guest.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-guest -x hostname:OpenWrt -C -R -O staticroutes &
+
+udhcpc -p /var/run/udhcpc-eth1_2.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_2.5 -x hostname:OpenWrt -C -R -O staticroutes 
+udhcpc -p /var/run/udhcpc-eth1.5.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1.5 -x hostname:OpenWrt -C -R -O staticroutes 
+udhcpc -p /var/run/udhcpc-eth1.1.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1.1 -x hostname:OpenWrt -C -R -O staticroutes 
+
+
+root@MSS5004W:/etc/config# ifconfig
+br-lan    Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:32
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1531 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:429 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:291875 (285.0 KiB)  TX bytes:172887 (168.8 KiB)
+
+br-wan    Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:32
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:662 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:792 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:79483 (77.6 KiB)  TX bytes:319176 (311.6 KiB)
+
+br1       Link encap:Ethernet  HWaddr AA:0A:EA:7B:46:E2
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth0      Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:31
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:249 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:0 (0.0 B)  TX bytes:100794 (98.4 KiB)
+
+eth0.4094 Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:31
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth1      Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:32
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8954 errors:0 dropped:72 overruns:0 frame:0
+          TX packets:1707 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:1383369 (1.3 MiB)  TX bytes:669887 (654.1 KiB)
+          Interrupt:5
+
+eth1_0    Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:32
+          inet addr:10.0.0.172  Bcast:10.0.0.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:4334 errors:34 dropped:0 overruns:0 frame:0
+          TX packets:633 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:467065 (456.1 KiB)  TX bytes:249737 (243.8 KiB)
+
+eth1_0.5  Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:32
+          inet addr:172.16.0.251  Bcast:172.16.0.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:803 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:65 errors:0 dropped:2 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:45719 (44.6 KiB)  TX bytes:25594 (24.9 KiB)
+
+eth1_1    Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:32
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth1_2    Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:32
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth1_3    Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:32
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:4548 errors:38 dropped:0 overruns:0 frame:0
+          TX packets:825 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:923615 (901.9 KiB)  TX bytes:321766 (314.2 KiB)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:16436  Metric:1
+          RX packets:7 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:756 (756.0 B)  TX bytes:756 (756.0 B)
+
+ra0       Link encap:Ethernet  HWaddr 1C:18:4A:3B:D4:30
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:6
+
+ra1       Link encap:Ethernet  HWaddr 1E:18:4A:38:D4:30
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 
 After the loop
 Before the package handling

@@ -1,0 +1,31 @@
+root@MSS5004W:/# ls -l /sys/class/net
+lrwxrwxrwx    1 root     root             0 Apr 23 12:17 br-lan -> ../../devices/virtual/net/br-lan
+lrwxrwxrwx    1 root     root             0 Apr 23 12:17 br1 -> ../../devices/virtual/net/br1
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 eth0 -> ../../devices/virtual/net/eth0
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 eth1 -> ../../devices/platform/ramips_eth.0/net/eth1
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 eth1_0 -> ../../devices/virtual/net/eth1_0
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 eth1_1 -> ../../devices/virtual/net/eth1_1
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 eth1_2 -> ../../devices/virtual/net/eth1_2
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 eth1_3 -> ../../devices/virtual/net/eth1_3
+lrwxrwxrwx    1 root     root             0 Apr 23 12:17 imq0 -> ../../devices/virtual/net/imq0
+lrwxrwxrwx    1 root     root             0 Apr 23 12:17 imq1 -> ../../devices/virtual/net/imq1
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 lo -> ../../devices/virtual/net/lo
+lrwxrwxrwx    1 root     root             0 Apr 23 11:10 ra0 -> ../../devices/virtual/net/ra0
+lrwxrwxrwx    1 root     root             0 Apr 23 12:17 ra1 -> ../../devices/virtual/net/ra1
+lrwxrwxrwx    1 root     root             0 Apr 23 12:17 ra2 -> ../../devices/virtual/net/ra2
+lrwxrwxrwx    1 root     root             0 Apr 23 12:17 ra3 -> ../../devices/virtual/net/ra3
+
+
+
+root@OpenWrt:/# ls -l /sys/class/net
+lrwxrwxrwx    1 root     root             0 Aug  7 12:09 br-lan -> ../../devices/virtual/net/br-lan
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 eth0 -> ../../devices/platform/ag71xx.0/net/eth0
+lrwxrwxrwx    1 root     root             0 Aug  7 12:09 eth0.1 -> ../../devices/virtual/net/eth0.1
+lrwxrwxrwx    1 root     root             0 Aug  7 12:09 eth0.2 -> ../../devices/virtual/net/eth0.2
+lrwxrwxrwx    1 root     root             0 Aug  7 12:09 eth0.3 -> ../../devices/virtual/net/eth0.3
+lrwxrwxrwx    1 root     root             0 Aug  7 12:09 eth0.5 -> ../../devices/virtual/net/eth0.5
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 eth1 -> ../../devices/platform/ag71xx.1/net/eth1
+lrwxrwxrwx    1 root     root             0 Aug  7 12:09 eth1.1 -> ../../devices/virtual/net/eth1.1
+lrwxrwxrwx    1 root     root             0 Jan  1  1970 lo -> ../../devices/virtual/net/lo
+lrwxrwxrwx    1 root     root             0 Aug  8 08:53 wlan0 -> ../../devices/platform/ar934x_wmac/net/wlan0
+

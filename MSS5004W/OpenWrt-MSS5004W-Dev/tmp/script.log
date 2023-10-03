@@ -1,0 +1,8 @@
+Log start
+Before killing the current udhcpc
+After killing the current udhcpc
+DHCPC IP cleared
+Before ping loop
+Tried to get ip
+Connection Established using UDHCPC
+before lua init - flag on

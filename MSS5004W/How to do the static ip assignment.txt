@@ -1,0 +1,19 @@
+
+POWER BUTTON RED BY DEFAULT*
+
+
+
+1.
+	eth1_0.5 -> eth1_0
+	proto -> static
+	ip -> @ip
+	netmask -> @netmask
+	gateway -> @gateway -> SaveGateway()
+	
+	reboot
+	
+2.
+	Ignore UDHCPC			^
+	Assign the gateway ---- |
+	
+	

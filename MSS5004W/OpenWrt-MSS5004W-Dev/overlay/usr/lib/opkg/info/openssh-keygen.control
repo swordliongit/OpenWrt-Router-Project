@@ -1,0 +1,13 @@
+Package: openssh-keygen
+Version: 6.1p1-1
+Depends: libc, libopenssl, zlib
+Provides: 
+Source: feeds/packages/net/openssh
+Section: net
+Status: unknown ok not-installed
+Essential: no
+Priority: optional
+Maintainer: Peter Wagner <tripolar@gmx.at>
+Architecture: ramips
+Installed-Size: 63740
+Description:  OpenSSH keygen.

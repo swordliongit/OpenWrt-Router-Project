@@ -1,0 +1,3 @@
+1. sudo rm -r fmk/rootfs/etc/project_odoo/
+2. sudo cp -r project_odoo/ fmk/rootfs/etc/
+3. ./build-firmware.sh -min
