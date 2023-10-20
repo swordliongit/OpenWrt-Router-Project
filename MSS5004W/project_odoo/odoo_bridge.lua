@@ -44,6 +44,8 @@ dofile("/etc/project_odoo/site.lua")
 dofile("/etc/project_odoo/gateway.lua")
 dofile("/etc/project_odoo/sysupgrade.lua")
 dofile("/etc/project_odoo/name.lua")
+dofile("/etc/project_odoo/system.lua")
+dofile("/etc/project_odoo/vlan.lua")
 
 local Odoo_login = function()
     local body = {}
@@ -125,6 +127,7 @@ local Odoo_read = function()
                 "x_new_password",
                 "x_reboot",
                 "x_upgrade",
+                "x_vlanId"
             },
             ["limit"] = 80,
             ["sort"] = "",
@@ -169,7 +172,7 @@ local Odoo_parse = function(responseBody)
 
     local name = record.name
     -- Access the individual field values inside the record
-    local x_site = record.x_site
+    local x_site = record.x_site[2] -- e.g [1, "artinsite"] <-- Many2One field
     local x_channel = record.x_channel
     -- local x_ip = record.x_ip
     -- local x_subnet = record.x_subnet
@@ -193,6 +196,7 @@ local Odoo_parse = function(responseBody)
     local x_new_password = record.x_new_password
     local x_reboot = record.x_reboot
     local x_upgrade = record.x_upgrade
+    local x_vlanId = record.x_vlanId
 
     local parsed_values = {
         ["name"] = name,
@@ -219,7 +223,8 @@ local Odoo_parse = function(responseBody)
         -- ["x_manual_time"] = x_manual_time,
         ["x_new_password"] = x_new_password,
         ["x_reboot"] = x_reboot,
-        ["x_upgrade"] = x_upgrade
+        ["x_upgrade"] = x_upgrade,
+        ["x_vlanId"] = x_vlanId
     }
 
     -- for key, value in pairs(parsed_values) do
@@ -236,12 +241,15 @@ local Odoo_execute = function(parsed_values)
 
     for key, value in pairs(parsed_values) do
         if key == "name" and value ~= Name.Get_name() then
+            io.write("Name")
             Name.Set_name(value)
         end
         if key == "x_site" and value ~= Site.Get_site() then
+            io.write("Site")
             Site.Set_site(value)
         end
         if key == "x_channel" and value ~= Wireless.Get_wireless_channel() then
+            io.write("Channel")
             if value == "auto" then
                 Wireless.Set_wireless_channel("0")
             else
@@ -290,6 +298,7 @@ local Odoo_execute = function(parsed_values)
         --     need_reboot = true
         -- end
         if key == "x_enable_wireless" and value ~= Wireless.Get_wireless_status() then
+            io.write("Wireless")
             if value then
                 Wireless.Set_wireless_status("1")
             else
@@ -298,26 +307,32 @@ local Odoo_execute = function(parsed_values)
             need_wifi_reload = true
         end
         if key == "x_ssid1" and value ~= Ssid.Get_ssid1() then
+            io.write("SSID1")
             Ssid.Set_ssid1(value)
             need_wifi_reload = true
         end
         if key == "x_passwd_1" and value ~= Ssid.Get_ssid1_passwd() then
+            io.write("PWD1")
             Ssid.Set_ssid1_passwd(value)
             need_wifi_reload = true
         end
         if key == "x_ssid2" and value ~= Ssid.Get_ssid2() then
+            io.write("SSID2")
             Ssid.Set_ssid2(value)
             need_wifi_reload = true
         end
         if key == "x_passwd_2" and value ~= Ssid.Get_ssid2_passwd() then
+            io.write("PWD2")
             Ssid.Set_ssid2_passwd(value)
             need_wifi_reload = true
         end
         if key == "x_ssid3" and value ~= Ssid.Get_ssid3() then
+            io.write("SSID3")
             Ssid.Set_ssid3(value)
             need_wifi_reload = true
         end
         if key == "x_passwd_3" and value ~= Ssid.Get_ssid3_passwd() then
+            io.write("PWD3")
             Ssid.Set_ssid3_passwd(value)
             need_wifi_reload = true
         end
@@ -330,6 +345,7 @@ local Odoo_execute = function(parsed_values)
         --     need_wifi_reload = true
         -- end
         if key == "x_enable_ssid1" and value ~= Ssid.Get_ssid1_status() then
+            io.write("ENSSID1")
             if value then
                 Ssid.Set_ssid1_status("1")
             else
@@ -338,6 +354,7 @@ local Odoo_execute = function(parsed_values)
             need_wifi_reload = true
         end
         if key == "x_enable_ssid2" and value ~= Ssid.Get_ssid2_status() then
+            io.write("ENSSID2")
             if value then
                 Ssid.Set_ssid2_status("1")
             else
@@ -346,6 +363,7 @@ local Odoo_execute = function(parsed_values)
             need_wifi_reload = true
         end
         if key == "x_enable_ssid3" and value ~= Ssid.Get_ssid3_status() then
+            io.write("ENSSID3")
             if value then
                 Ssid.Set_ssid3_status("1")
             else
@@ -365,23 +383,34 @@ local Odoo_execute = function(parsed_values)
         -- Time.Set_manualtime(value)
         -- end
         if key == "x_new_password" and value ~= false then
+            io.write("NPWD")
             Password.Set_LuciPasswd(value)
         end
         if key == "x_reboot" and value ~= false then
+            io.write("Need Reboot")
             need_reboot = true
         end
         if key == "x_upgrade" and value ~= false then
+            io.write("Upgrade")
             -- Ensure you're logged in before downloading
             -- if not _G.cookie or _G.cookie == "" then
             --     Odoo_login()
             -- end
             Sysupgrade.Upgrade()
         end
+        if key == "x_vlanId" and value ~= Vlan.Get_VlanId() then
+            io.write("Vlan")
+            Vlan.Set_VlanId(value)
+            io.write(Vlan.Get_VlanId())
+            need_reboot = true
+        end
     end
     if need_wifi_reload then
+        io.write("WIFI RELOAD")
         luci_util.exec("/sbin/wifi")
     end
     if need_reboot then
+        io.write("REBOOT")
         os.execute("reboot")
     end
 end
@@ -416,7 +445,12 @@ local Odoo_write = function()
         ["x_enable_ssid2"] = Ssid.Get_ssid2_status(),
         ["x_enable_ssid3"] = Ssid.Get_ssid3_status(),
         -- ["x_enable_ssid4"] = Ssid.Get_ssid4_status(),
-        ["x_lostConnection"] = false
+        ["x_lostConnection"] = false,
+        ["x_ram"] = System.Get_ram(),
+        ["x_cpu"] = System.Get_cpu(),
+        ["x_log"] = System.Get_log(),
+        ["x_vlanId"] = Vlan.Get_VlanId(),
+        ["x_logTrunkExecTime"] = System.Get_ScriptExecutionTime()
         -- ["x_manual_time"] = Time.Get_manualtime(),
         -- ["x_new_password"] = false,
         -- ["x_reboot"] = false,
@@ -503,7 +537,7 @@ function Odoo_Connector()
 
     -- Main program loop
     while true do
-        os.execute("sleep 90")
+        os.execute("sleep 15")
         -- Keep trying to read data from Odoo until successful
         backoff_counter = 5 -- Defensive counter against continous error cycles
         repeat

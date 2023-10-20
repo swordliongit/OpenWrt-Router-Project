@@ -4,6 +4,14 @@
 ]]
 
 --[[
+    Description:
+
+    First boot -> Enable DHCP pass
+    -> Reboot -> Clear static Ip -> Restart Network
+    -> Start UDHCPC -> Set Dummy Ip -> Install Packages -> Start Bridging
+]]
+
+--[[
     DEFINITIONS
 ]]
 -- Set output log file
@@ -217,6 +225,7 @@ end
 --         print("Failed to open the file for reading.")
 --     end
 -- end
+
 --[[
     EXECUTION START
 ]]
@@ -228,12 +237,14 @@ io.write("Before killing the current udhcpc\n")
 os.execute("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
 enableDhcpPass()
 
+bootChecker()
+
 -- UDHCPC Clear Block
 os.execute("killall udhcpc")
 io.write("After killing the current udhcpc\n")
 os.execute("sleep 1")
 
--- Static IP Clear and DHCP Passthrough Block
+-- Static IP Clear Block
 if dhcpOn() then
     clearIpOnBridge()
     io.write("DHCPC IP cleared\n")
@@ -274,7 +285,6 @@ if hasInternet() then
     if flagExists then
         io.write("before lua init - flag on\n")
 
-        bootChecker()
         -- Execute odoo_bridge.lua and capture errors to script.log
         local success, error_message = pcall(dofile, "/etc/project_odoo/odoo_bridge.lua")
 
@@ -306,7 +316,7 @@ if hasInternet() then
         -- os.execute(
         --     "wget -P /tmp http://81.0.124.218/attitude_adjustment/12.09/ramips/rt305x/packages/luasec_0.4-1_ramips.ipk"
         -- )
-
+"wget -P http://81.0.124.218/attitude_adjustment/12.09/ramips/rt288x/packages/luci-lib-nixio_0.11.1-1_ramips.ipk"
         -- os.execute("opkg install /tmp/luasocket_2.0.2-3_ramips.ipk")
         os.execute("opkg install /tmp/json4lua_0.9.53-1_ramips.ipk")
         -- os.execute("opkg install /tmp/luafilesystem_1.5.0-1_ramips.ipk")
@@ -325,8 +335,6 @@ if hasInternet() then
 
         io.open(flagFile, "w"):close()
         io.write("before lua init - flag off\n")
-
-        bootChecker()
         -- Execute odoo_bridge.lua and capture errors to script.log
         local success, error_message = pcall(dofile, "/etc/project_odoo/odoo_bridge.lua")
 

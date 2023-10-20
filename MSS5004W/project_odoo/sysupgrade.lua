@@ -34,5 +34,4 @@ function Sysupgrade.Upgrade()
     else
         io.write("HTTP request failed with status code:", code .. "\n")
     end
-    io.close(logFile)
 end
