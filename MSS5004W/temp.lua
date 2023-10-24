@@ -1,42 +1,44 @@
-json = require("json")
+function Time.Get_currentTime()
+    -- Sample current time in the format you provided
+    local current_time_str = os.date("%c")
 
-local requestBody = json.encode({
-    ["name"] = "Name.Get_name()",
-    ["x_site"] = "Site.Get_site()",
-    -- ["x_device_update"] = false,
-    -- ["x_update_date"] = Time.Get_updatetime(),  --> update time is now controlled through the web controller in Odoo server side
-    ["x_uptime"] = "Time.Get_uptime()",
-    ["x_channel"] = "Wireless.Get_wireless_channel()",
-    ["x_mac"] = "Mac.Get_mac()",
-    ["x_device_info"] = "Devices.Get_DevicesString()",
-    ["x_ip"] = "LanIP.Get_Ip()",
-    ["x_subnet"] = "Netmask.Get_netmask()",
-    ["x_gateway"] = "Gateway.Get_gateway()",
-    -- ["x_dhcp_server"] = Dhcp.Get_dhcp_server(),
-    -- ["x_dhcp_client"] = Dhcp.Get_dhcp_client(),
-    ["x_enable_wireless"] = "Wireless.Get_wireless_status()",
-    ["x_ssid1"] = "Ssid.Get_ssid1()",
-    ["x_passwd_1"] = "Ssid.Get_ssid1_passwd()",
-    ["x_ssid2"] = "Ssid.Get_ssid2()",
-    ["x_passwd_2"] = "Ssid.Get_ssid2_passwd()",
-    ["x_ssid3"] = "Ssid.Get_ssid3()",
-    ["x_passwd_3"] = "Ssid.Get_ssid3_passwd()",
-    -- ["x_ssid4"] = Ssid.Get_ssid4(),
-    -- ["x_passwd_4"] = Ssid.Get_ssid4_passwd(),
-    ["x_enable_ssid1"] = "Ssid.Get_ssid1_status()",
-    ["x_enable_ssid2"] = "Ssid.Get_ssid2_status()",
-    ["x_enable_ssid3"] = "Ssid.Get_ssid3_status()",
-    -- ["x_enable_ssid4"] = Ssid.Get_ssid4_status(),
-    ["x_lostConnection"] = false,
-    ["x_ram"] = "System.Get_ram()",
-    ["x_cpu"] = "System.Get_cpu()",
-    ["x_log"] = "System.Get_log()",
-    ["x_vlanId"] = "Vlan.Get_VlanId()",
-    ["x_logTrunkExecTime"] = "System.Get_ScriptExecutionTime()"
-    -- ["x_manual_time"] = Time.Get_manualtime(),
-    -- ["x_new_password"] = false,
-    -- ["x_reboot"] = false,
-    -- ["x_upgrade"] = false
-})
+    -- Define a table to map month names to month numbers
+    local months = {
+        Jan = "01",
+        Feb = "02",
+        Mar = "03",
+        Apr = "04",
+        May = "05",
+        Jun = "06",
+        Jul = "07",
+        Aug = "08",
+        Sep = "09",
+        Oct = "10",
+        Nov = "11",
+        Dec = "12"
+    }
 
-print("Send " .. requestBody)
+    -- Extract the date and time components
+    local day, month, day_num, time, year = current_time_str:match("(%a+) (%a+) (%d+) (%d+:%d+:%d+) (%d+)")
+
+    -- Convert the month name to a number
+    local month_num = months[month]
+
+    -- Parse the time components (hours, minutes, and seconds)
+    local hours, minutes, seconds = time:match("(%d+):(%d+):(%d+)")
+
+    -- Add 3 hours and 50 minutes
+    hours = tonumber(hours) + 3
+    minutes = tonumber(minutes) + 40
+
+    -- Ensure minutes do not exceed 59 and handle carryover
+    if minutes >= 60 then
+        hours = hours + 1
+        minutes = minutes - 60
+    end
+
+    -- Create a new time string with the adjusted time
+    local new_time = string.format("%s.%s.%s %02d:%02d:%02d", day_num, month_num, year, hours, minutes, seconds)
+
+    return new_time
+end

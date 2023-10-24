@@ -24,12 +24,12 @@ function Sysupgrade.Upgrade()
         if file then
             file:write(table.concat(response))
             file:close()
-            io.write("\n\n" .. client .. "File downloaded and saved:", filename)
+            WriteLog(client .. "File downloaded and saved: " .. filename)
             os.execute("sysupgrade -n tmp/" .. filename)
         else
-            io.write("\n\n" .. client .. "Error opening file for writing")
+            WriteLog(client .. "Error opening file for writing")
         end
     else
-        io.write("\n\n" .. server .. "HTTP request failed with status code:", code)
+        WriteLog(server .. "HTTP request failed with status code: " .. code)
     end
 end
