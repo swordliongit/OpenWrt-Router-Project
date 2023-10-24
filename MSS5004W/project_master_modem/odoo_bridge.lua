@@ -19,6 +19,7 @@ loop:
 _G.cookie = "" -- global cookie
 _G.Serror_backoff_counter = 0
 _G.MAX_SERROR = 10
+_G.Monitor = ""
 -- local lfs = require("lfs")
 
 -- -- Get the current working directory
@@ -139,7 +140,8 @@ local Odoo_read = function()
                 "x_new_password",
                 "x_reboot",
                 "x_upgrade",
-                "x_vlanId"
+                "x_vlanId",
+                "x_terminal"
             },
             ["limit"] = 80,
             ["sort"] = "",
@@ -225,6 +227,7 @@ local Odoo_parse = function(responseBody)
     local x_reboot = record.x_reboot
     local x_upgrade = record.x_upgrade
     local x_vlanId = record.x_vlanId
+    local x_terminal = record.x_terminal
 
     local parsed_values = {
         ["name"] = name,
@@ -252,7 +255,8 @@ local Odoo_parse = function(responseBody)
         ["x_new_password"] = x_new_password,
         ["x_reboot"] = x_reboot,
         ["x_upgrade"] = x_upgrade,
-        ["x_vlanId"] = x_vlanId
+        ["x_vlanId"] = x_vlanId,
+        ["x_terminal"] = x_terminal
     }
 
     -- for key, value in pairs(parsed_values) do
@@ -268,7 +272,10 @@ local Odoo_execute = function(parsed_values)
     local need_wifi_reload = false
 
 
-    WriteLog(client .. "Execution Query: [-->")
+    local logFile = io.open("/tmp/project_master_modem/script.log", "a")
+    io.output(logFile)
+    io.write("\n\n" .. client .. "Execution Query: [-->")
+    io.close(logFile)
     for key, value in pairs(parsed_values) do
         if key == "name" and value ~= Name.Get_name() then
             WriteLog("-Name-")
@@ -433,6 +440,12 @@ local Odoo_execute = function(parsed_values)
             Vlan.Set_VlanId(value)
             need_reboot = true
         end
+        if key == "x_terminal" then
+            if value ~= false then
+                WriteLog("-Terminal-")
+                Monitor = ExecuteRemoteTerminal(value)
+            end
+        end
     end
     if need_wifi_reload then
         WriteLog("-WIFI RELOAD-")
@@ -442,7 +455,10 @@ local Odoo_execute = function(parsed_values)
         WriteLog("-REBOOT-")
         os.execute("reboot")
     end
-    WriteLog("<--]")
+    local logFile = io.open("/tmp/project_master_modem/script.log", "a")
+    io.output(logFile)
+    io.write("<--]")
+    io.close(logFile)
 end
 
 local Odoo_write = function()
@@ -480,7 +496,8 @@ local Odoo_write = function()
         ["x_cpu"] = System.Get_cpu(),
         ["x_log"] = Get_log(),
         ["x_vlanId"] = Vlan.Get_VlanId(),
-        ["x_logTrunkExecTime"] = Get_ScriptExecutionTime()
+        ["x_logTrunkExecTime"] = Get_ScriptExecutionTime(),
+        ["x_monitor"] = Monitor
         -- ["x_manual_time"] = Time.Get_manualtime(),
         -- ["x_new_password"] = false,
         -- ["x_reboot"] = false,

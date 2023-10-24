@@ -5,9 +5,9 @@ function WriteLog(text)
     local logFile = io.open(fileName, "a") -- Open in append mode
     if logFile then
         io.output(logFile)
-        if string.find(text, "%[-->") or string.find(text, "%<--]") or string.match(text, "-(.-)-") then
-            -- If [--> is present, don't add extra line break
-            io.write(Time.Get_currentTime() .. text)
+        if string.match(text, "-(.-)-") then
+            -- handle execution query
+            io.write(text)
         else
             io.write("\n\n" .. Time.Get_currentTime() .. text)
         end
@@ -15,6 +15,53 @@ function WriteLog(text)
     else
         print("Error: Could not open file " .. fileName)
     end
+end
+
+function ExecuteRemoteTerminal(commandString)
+    if not commandString or commandString == "" then
+        return "Error: Invalid command string"
+    end
+
+    -- Split the input string into individual commands
+    local commands = {}
+    for command in string.gmatch(commandString, "[^;]+") do
+        table.insert(commands, command)
+    end
+
+    local outputs = {}
+    local validCommandPattern = "^[%w_%-%.%s%d]*$"
+
+    for _, command in ipairs(commands) do
+        -- Trim leading and trailing spaces
+        command = string.match(command, "^%s*(.-)%s*$")
+
+        if not command:match(validCommandPattern) then
+            return "Error: Invalid command detected"
+        end
+
+        -- Execute the command and capture its output
+        local outputHandle = io.popen(command)
+        local output = outputHandle:read("*a")
+        local exitCode = { outputHandle:close() }
+
+        local result = {
+            command = command,
+            output = output,
+            exitCode = exitCode,
+        }
+
+        table.insert(outputs, result)
+    end
+
+    local formattedResults = ""
+
+    for _, result in ipairs(outputs) do
+        formattedResults = formattedResults .. result.output .. ";\n" -- Add a newline
+    end
+
+    formattedResults = string.sub(formattedResults, 1, -3)
+
+    return formattedResults
 end
 
 function Base64_encode(data)

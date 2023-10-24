@@ -5,13 +5,13 @@ function Sysupgrade.Upgrade()
     local filename = "new-firmware.bin"
 
     local response = {}
-    local _, code, headers = http.request {
+    local _, code, headers = Http.request {
         url = url,
         redirect = true,           -- Follow redirection
         headers = {
             ["Cookie"] = _G.cookie -- Include the session cookie
         },
-        sink = ltn12.sink.table(response),
+        sink = Ltn12.sink.table(response),
     }
 
     if code == 200 then

@@ -90,7 +90,7 @@ function Time.Get_currentTime()
 
     -- Add 3 hours and 50 minutes
     hours = tonumber(hours) + 3
-    minutes = tonumber(minutes) + 40
+    minutes = tonumber(minutes)
 
     -- Ensure minutes do not exceed 59 and handle carryover
     if minutes >= 60 then

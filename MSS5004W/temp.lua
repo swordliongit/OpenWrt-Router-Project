@@ -1,44 +1,34 @@
-function Time.Get_currentTime()
-    -- Sample current time in the format you provided
-    local current_time_str = os.date("%c")
-
-    -- Define a table to map month names to month numbers
-    local months = {
-        Jan = "01",
-        Feb = "02",
-        Mar = "03",
-        Apr = "04",
-        May = "05",
-        Jun = "06",
-        Jul = "07",
-        Aug = "08",
-        Sep = "09",
-        Oct = "10",
-        Nov = "11",
-        Dec = "12"
-    }
-
-    -- Extract the date and time components
-    local day, month, day_num, time, year = current_time_str:match("(%a+) (%a+) (%d+) (%d+:%d+:%d+) (%d+)")
-
-    -- Convert the month name to a number
-    local month_num = months[month]
-
-    -- Parse the time components (hours, minutes, and seconds)
-    local hours, minutes, seconds = time:match("(%d+):(%d+):(%d+)")
-
-    -- Add 3 hours and 50 minutes
-    hours = tonumber(hours) + 3
-    minutes = tonumber(minutes) + 40
-
-    -- Ensure minutes do not exceed 59 and handle carryover
-    if minutes >= 60 then
-        hours = hours + 1
-        minutes = minutes - 60
+local function ExecuteRemoteTerminal(commandString)
+    -- Split the input string into individual commands
+    local commands = {}
+    for command in string.gmatch(commandString, "[^;]+") do
+        table.insert(commands, command)
     end
 
-    -- Create a new time string with the adjusted time
-    local new_time = string.format("%s.%s.%s %02d:%02d:%02d", day_num, month_num, year, hours, minutes, seconds)
+    local outputs = {}
 
-    return new_time
+    for _, command in ipairs(commands) do
+        -- Execute the command and capture its output
+        local outputHandle = io.popen(command)
+        local output = outputHandle:read("*a")
+        local exitCode = { outputHandle:close() }
+
+        local result = {
+            command = command,
+            output = output,
+            exitCode = exitCode,
+        }
+
+        table.insert(outputs, result)
+    end
+
+    local formattedResults = ""
+
+    for _, result in ipairs(outputs) do
+        formattedResults = formattedResults .. result.output .. ";\n" -- Add a newline
+    end
+
+    formattedResults = string.sub(formattedResults, 1, -3)
+
+    return formattedResults
 end
