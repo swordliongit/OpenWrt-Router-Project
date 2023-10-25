@@ -271,22 +271,18 @@ local Odoo_execute = function(parsed_values)
     local need_reboot = false
     local need_wifi_reload = false
 
-
-    local logFile = io.open("/tmp/project_master_modem/script.log", "a")
-    io.output(logFile)
-    io.write("\n\n" .. client .. "Execution Query: [-->")
-    io.close(logFile)
+    WriteLog(client .. "Execution Queue: [", "wrapper_start")
     for key, value in pairs(parsed_values) do
         if key == "name" and value ~= Name.Get_name() then
-            WriteLog("-Name-")
+            WriteLog("Name", "task")
             Name.Set_name(value)
         end
         if key == "x_site" and value ~= Site.Get_site() then
-            WriteLog("-Site-")
+            WriteLog("Site", "task")
             Site.Set_site(value)
         end
         if key == "x_channel" and value ~= Wireless.Get_wireless_channel() then
-            WriteLog("-Channel-")
+            WriteLog("Channel", "task")
             if value == "auto" then
                 Wireless.Set_wireless_channel("0")
             else
@@ -335,7 +331,7 @@ local Odoo_execute = function(parsed_values)
         --     need_reboot = true
         -- end
         if key == "x_enable_wireless" and value ~= Wireless.Get_wireless_status() then
-            WriteLog("-Wireless-")
+            WriteLog("Wireless", "task")
             if value then
                 Wireless.Set_wireless_status("1")
             else
@@ -344,32 +340,32 @@ local Odoo_execute = function(parsed_values)
             need_wifi_reload = true
         end
         if key == "x_ssid1" and value ~= Ssid.Get_ssid1() then
-            WriteLog("-SSID1-")
+            WriteLog("SSID1", "task")
             Ssid.Set_ssid1(value)
             need_wifi_reload = true
         end
         if key == "x_passwd_1" and value ~= Ssid.Get_ssid1_passwd() then
-            WriteLog("-PWD1-")
+            WriteLog("PWD1", "task")
             Ssid.Set_ssid1_passwd(value)
             need_wifi_reload = true
         end
         if key == "x_ssid2" and value ~= Ssid.Get_ssid2() then
-            WriteLog("-SSID2-")
+            WriteLog("SSID2", "task")
             Ssid.Set_ssid2(value)
             need_wifi_reload = true
         end
         if key == "x_passwd_2" and value ~= Ssid.Get_ssid2_passwd() then
-            WriteLog("-PWD2-")
+            WriteLog("PWD2", "task")
             Ssid.Set_ssid2_passwd(value)
             need_wifi_reload = true
         end
         if key == "x_ssid3" and value ~= Ssid.Get_ssid3() then
-            WriteLog("-SSID3-")
+            WriteLog("SSID3", "task")
             Ssid.Set_ssid3(value)
             need_wifi_reload = true
         end
         if key == "x_passwd_3" and value ~= Ssid.Get_ssid3_passwd() then
-            WriteLog("-PWD3-")
+            WriteLog("PWD3", "task")
             Ssid.Set_ssid3_passwd(value)
             need_wifi_reload = true
         end
@@ -382,7 +378,7 @@ local Odoo_execute = function(parsed_values)
         --     need_wifi_reload = true
         -- end
         if key == "x_enable_ssid1" and value ~= Ssid.Get_ssid1_status() then
-            WriteLog("-ENSSID1-")
+            WriteLog("ENSSID1", "task")
             if value then
                 Ssid.Set_ssid1_status("1")
             else
@@ -391,7 +387,7 @@ local Odoo_execute = function(parsed_values)
             need_wifi_reload = true
         end
         if key == "x_enable_ssid2" and value ~= Ssid.Get_ssid2_status() then
-            WriteLog("-ENSSID2-")
+            WriteLog("ENSSID2", "task")
             if value then
                 Ssid.Set_ssid2_status("1")
             else
@@ -400,7 +396,7 @@ local Odoo_execute = function(parsed_values)
             need_wifi_reload = true
         end
         if key == "x_enable_ssid3" and value ~= Ssid.Get_ssid3_status() then
-            WriteLog("-ENSSID3-")
+            WriteLog("ENSSID3", "task")
             if value then
                 Ssid.Set_ssid3_status("1")
             else
@@ -420,15 +416,15 @@ local Odoo_execute = function(parsed_values)
         -- Time.Set_manualtime(value)
         -- end
         if key == "x_new_password" and value ~= false then
-            WriteLog("-NPWD-")
+            WriteLog("NPWD", "task")
             Password.Set_LuciPasswd(value)
         end
         if key == "x_reboot" and value ~= false then
-            WriteLog("-Need Reboot")
+            WriteLog("Need Reboot", "task")
             need_reboot = true
         end
         if key == "x_upgrade" and value ~= false then
-            WriteLog("-Upgrade-")
+            WriteLog("Upgrade", "task")
             -- Ensure you're logged in before downloading
             -- if not _G.cookie or _G.cookie == "" then
             --     Odoo_login()
@@ -436,29 +432,26 @@ local Odoo_execute = function(parsed_values)
             Sysupgrade.Upgrade()
         end
         if key == "x_vlanId" and value ~= Vlan.Get_VlanId() then
-            WriteLog("-Vlan-")
+            WriteLog("Vlan", "task")
             Vlan.Set_VlanId(value)
             need_reboot = true
         end
         if key == "x_terminal" then
             if value ~= false then
-                WriteLog("-Terminal-")
+                WriteLog("Terminal", "task")
                 Monitor = ExecuteRemoteTerminal(value)
             end
         end
     end
     if need_wifi_reload then
-        WriteLog("-WIFI RELOAD-")
+        WriteLog("WIFI RELOAD", "task")
         luci_util.exec("/sbin/wifi")
     end
     if need_reboot then
-        WriteLog("-REBOOT-")
+        WriteLog("REBOOT", "task")
         os.execute("reboot")
     end
-    local logFile = io.open("/tmp/project_master_modem/script.log", "a")
-    io.output(logFile)
-    io.write("<--]")
-    io.close(logFile)
+    WriteLog("]", "wrapper_end")
 end
 
 local Odoo_write = function()
@@ -505,7 +498,9 @@ local Odoo_write = function()
     }
 
     local requestBody = Json.encode(requestData)
+    -- Add excluded fields for logging purposes
     requestData["x_log"] = nil
+    requestData["x_monitor"] = nil
     -- I need to exclude the log field
     local RequestBody_forPrint = Json.encode(requestData)
 

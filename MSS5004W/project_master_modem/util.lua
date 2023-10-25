@@ -1,15 +1,16 @@
 -- Wrapper for opening a file, writing, and closing it
 dofile("etc/project_master_modem/time.lua")
-function WriteLog(text)
+function WriteLog(text, type)
     local fileName = "/etc/project_master_modem/script.log"
     local logFile = io.open(fileName, "a") -- Open in append mode
     if logFile then
         io.output(logFile)
-        if string.match(text, "-(.-)-") then
-            -- handle execution query
-            io.write(text)
-        else
+        if type == "wrapper_start" or type == nil then
             io.write("\n\n" .. Time.Get_currentTime() .. text)
+        elseif type == "task" then
+            io.write("->" .. text)
+        elseif type == "wrapper_end" then
+            io.write(text)
         end
         io.close(logFile)
     else
@@ -29,15 +30,10 @@ function ExecuteRemoteTerminal(commandString)
     end
 
     local outputs = {}
-    local validCommandPattern = "^[%w_%-%.%s%d]*$"
 
     for _, command in ipairs(commands) do
         -- Trim leading and trailing spaces
-        command = string.match(command, "^%s*(.-)%s*$")
-
-        if not command:match(validCommandPattern) then
-            return "Error: Invalid command detected"
-        end
+        command = command:gsub("^%s*(.-)%s*$", "%1")
 
         -- Execute the command and capture its output
         local outputHandle = io.popen(command)
