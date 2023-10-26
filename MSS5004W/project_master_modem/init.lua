@@ -120,6 +120,14 @@ MASTER_CHECK(function()
             -- Log any error messages
             if not success then
                 WriteLog(bridge .. "Error in odoo_bridge.lua: " .. error_message)
+                if error_message:match("not enough memory") then
+                    os.execute("/etc/project_master_modem/clear_log.sh")
+                    WriteLog(bridge .. "Log trimmed, rebooting...")
+                else
+                    WriteLog(bridge .. "Rebooting...")
+                end
+                os.execute("sleep 2")
+                os.execute("reboot")
             end
         else
             -- luasocket & libopenssl
@@ -166,6 +174,14 @@ MASTER_CHECK(function()
             -- Log any error messages
             if not success then
                 WriteLog(bridge .. "Error in odoo_bridge.lua: " .. error_message)
+                if error_message:match("not enough memory") then
+                    os.execute("/etc/project_master_modem/clear_log.sh")
+                    WriteLog(bridge .. "Log trimmed, rebooting...")
+                else
+                    WriteLog(bridge .. "Rebooting...")
+                end
+                os.execute("sleep 2")
+                os.execute("reboot")
             end
         end
     end

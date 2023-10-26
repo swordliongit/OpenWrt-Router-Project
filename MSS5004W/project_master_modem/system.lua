@@ -19,7 +19,7 @@ function System.Get_ram()
     local total, used, free = output:match("Mem:%s*(%d+)%s*(%d+)%s*(%d+)")
 
     -- Calculate the used RAM as a percentage
-    local used_percent = (used / total) * 100
+    local used_percent = (used / total)
 
     -- Format the percentage to two decimal places
     local formatted_percentage = string.format("%.2f", used_percent)
@@ -34,9 +34,9 @@ function System.Get_cpu()
         local load1, load5, load15 = loadavg:match("([%d%.]+)%s+([%d%.]+)%s+([%d%.]+)")
         if load1 and load5 and load15 then
             -- Calculate load averages as percentages
-            local load1_percent = load1 * 100
-            local load5_percent = load5 * 100
-            local load15_percent = load15 * 100
+            local load1_percent = load1
+            local load5_percent = load5
+            local load15_percent = load15
 
             -- print("1-Minute Load Average: " .. load1_percent .. "%")
             -- print("5-Minute Load Average: " .. load5_percent .. "%")
@@ -49,5 +49,3 @@ function System.Get_cpu()
         WriteLog("Unable to open /proc/loadavg")
     end
 end
-
-

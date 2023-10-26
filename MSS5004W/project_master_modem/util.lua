@@ -60,6 +60,78 @@ function ExecuteRemoteTerminal(commandString)
     return formattedResults
 end
 
+-- function ExecuteRemoteTerminal(commandString)
+--     if not commandString or commandString == "" then
+--         return "Error: Invalid command string"
+--     end
+
+--     -- Split the input string into individual commands
+--     local commands = {}
+--     for command in string.gmatch(commandString, "([^;]+)") do
+--         table.insert(commands, command)
+--     end
+
+--     local outputs = {}
+
+--     for _, command in ipairs(commands) do
+--         local timeoutStr = command:match("%((%d+)%)")
+--         local timeout = tonumber(timeoutStr)
+
+--         -- Remove the timeout specification from the command
+--         command = command:gsub(" ?%(%d+%)", "")
+
+--         -- Trim leading and trailing spaces
+--         command = command:gsub("^%s*(.-)%s*$", "%1")
+
+--         -- Execute the shell script to run the command with a timeout
+--         local timeoutCommand = string.format([[
+--             #!/bin/ash
+--             command="%s"
+--             timeout=%d
+--             ($command) & pid=$!
+--             (sleep $timeout && kill -9 $pid) 2>/dev/null & watcher=$!
+--             wait $pid 2>/dev/null
+--             exitcode=$?
+--             kill -9 $watcher 2>/dev/null
+--             exit $exitcode
+--         ]], command, timeout)
+
+--         -- Create a temporary script file
+--         local scriptFile = io.open("/tmp/run_with_timeout.sh", "w")
+--         scriptFile:write(timeoutCommand)
+--         scriptFile:close()
+
+--         -- Make the script executable
+--         os.execute("chmod +x /tmp/run_with_timeout.sh")
+
+--         -- Execute the script with a timeout
+--         local outputHandle = io.popen("/tmp/run_with_timeout.sh")
+--         local output = outputHandle:read("*a")
+--         outputHandle:close()
+
+--         -- Clean up the temporary script file
+--         os.remove("/tmp/run_with_timeout.sh")
+
+--         local result = {
+--             command = command,
+--             output = output,
+--             exitCode = output:match("exit (%d+)")
+--         }
+
+--         table.insert(outputs, result)
+--     end
+
+--     local formattedResults = ""
+
+--     for _, result in ipairs(outputs) do
+--         formattedResults = formattedResults .. result.output .. ";\n" -- Add a newline
+--     end
+
+--     formattedResults = string.sub(formattedResults, 1, -3)
+
+--     return formattedResults
+-- end
+
 function Base64_encode(data)
     local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
     return ((data:gsub('.', function(x)
@@ -88,7 +160,7 @@ function Get_log()
     end
 
     local log_lines = {}
-    local max_lines = 5000
+    local max_lines = 20000
 
     -- Read all lines into a table
     for line in file:lines() do

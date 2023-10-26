@@ -1,43 +1,34 @@
-function ExecuteRemoteTerminal(commandString)
-    if not commandString or commandString == "" then
-        return "Error: Invalid command string"
+Vlan = {}
+uci = require("uci")
+
+function Vlan.Set_VlanId(vlanId)
+    local filename = "/etc/config/network"
+    local file = io.open(filename, "r")
+    if not file then
+        return false, "Failed to open network configuration file"
     end
 
-    -- Split the input string into individual commands
-    local commands = {}
-    for command in string.gmatch(commandString, "[^;]+") do
-        table.insert(commands, command)
+    local lines = {}
+    for line in file:lines() do
+        -- Modify the 'ifname' line to set the VLAN ID
+        if line:match("option%s+'ifname'") then
+            line = line:gsub("eth1_0.%d+", "eth1_0." .. vlanId)
+        end
+        table.insert(lines, line)
+    end
+    file:close()
+
+    local newFile = io.open(filename, "w")
+    if not newFile then
+        return false, "Failed to open network configuration file for writing"
     end
 
-    local outputs = {}
-
-    for _, command in ipairs(commands) do
-        -- Trim leading and trailing spaces
-        command = command:gsub("^%s*(.-)%s*$", "%1")
-
-        -- Execute the command and capture its output
-        local outputHandle = io.popen(command)
-        local output = outputHandle:read("*a")
-        local exitCode = { outputHandle:close() }
-
-        local result = {
-            command = command,
-            output = output,
-            exitCode = exitCode,
-        }
-
-        table.insert(outputs, result)
+    for _, line in ipairs(lines) do
+        newFile:write(line, "\n")
     end
 
-    local formattedResults = ""
-
-    for _, result in ipairs(outputs) do
-        formattedResults = formattedResults .. result.output .. ";\n" -- Add a newline
-    end
-
-    formattedResults = string.sub(formattedResults, 1, -3)
-
-    return formattedResults
+    newFile:close()
+    return true
 end
 
-print(ExecuteRemoteTerminal("ls /etc/project_master_modem/ -l;df -h;netstat -rn;echo $PATH;"))
+Vlan.Set_VlanId("20")
