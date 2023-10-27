@@ -49,3 +49,36 @@ function System.Get_cpu()
         WriteLog("Unable to open /proc/loadavg")
     end
 end
+
+function System.Get_disk()
+    local disk_info = {}
+    local util = require("luci.util")
+
+    local df_output = util.exec("df -h")
+    for line in df_output:gmatch("[^\r\n]+") do
+        local device, size, used, available, percent, mount_point = line:match(
+            "(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S+)")
+        if device and device ~= "Filesystem" then
+            disk_info[mount_point] = {
+                used = percent,
+                size = size
+            }
+        end
+    end
+
+    return disk_info["/overlay"].used
+end
+
+function System.Get_firmwareVersion()
+    local firmwareVersion_path = "/etc/project_master_modem/res/version"
+    local version = ""
+
+    -- Open the file for reading
+    local firmwareVersion_file = io.open(firmwareVersion_path, "r")
+    if firmwareVersion_file then
+        version = firmwareVersion_file:read("*all")
+        firmwareVersion_file:close()
+    end
+
+    return version
+end

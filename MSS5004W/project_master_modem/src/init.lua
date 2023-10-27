@@ -18,7 +18,7 @@ _G.server = " [SERVER] "
 _G.client = " [MSS5004W] "
 _G.bridge = " [BRIDGE] "
 
-dofile("/etc/project_master_modem/util.lua")
+dofile("/etc/project_master_modem/src/util.lua")
 
 -- Check if packages were installed
 local flagFile = "/etc/flag_packages_installed"
@@ -30,7 +30,7 @@ function MASTER_CHECK(func, ...)
     local success, result = pcall(func, ...)
     if not success then
         local errorMsg = "Error: " .. result
-        local backupLog = io.open("/etc/project_master_modem/master_init.log", "a")
+        local backupLog = io.open("/etc/project_master_modem/res/master_init.log", "a")
         io.output(backupLog)
         io.write(errorMsg .. "\n")
         io.close(backupLog)
@@ -115,13 +115,13 @@ MASTER_CHECK(function()
         if flagExists then
             WriteLog(client .. "before lua init - flag on")
             -- Execute odoo_bridge.lua and capture errors to script.log
-            local success, error_message = pcall(dofile, "/etc/project_master_modem/odoo_bridge.lua")
+            local success, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
 
             -- Log any error messages
             if not success then
                 WriteLog(bridge .. "Error in odoo_bridge.lua: " .. error_message)
                 if error_message:match("not enough memory") then
-                    os.execute("/etc/project_master_modem/clear_log.sh")
+                    os.execute("/etc/project_master_modem/res/clear_log.sh")
                     WriteLog(bridge .. "Log trimmed, rebooting...")
                 else
                     WriteLog(bridge .. "Rebooting...")
@@ -169,13 +169,13 @@ MASTER_CHECK(function()
             io.open(flagFile, "w"):close()
             WriteLog(client .. "before lua init - flag off")
             -- Execute odoo_bridge.lua and capture errors to script.log
-            local success, error_message = pcall(dofile, "/etc/project_master_modem/odoo_bridge.lua")
+            local success, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
 
             -- Log any error messages
             if not success then
                 WriteLog(bridge .. "Error in odoo_bridge.lua: " .. error_message)
                 if error_message:match("not enough memory") then
-                    os.execute("/etc/project_master_modem/clear_log.sh")
+                    os.execute("/etc/project_master_modem/res/clear_log.sh")
                     WriteLog(bridge .. "Log trimmed, rebooting...")
                 else
                     WriteLog(bridge .. "Rebooting...")

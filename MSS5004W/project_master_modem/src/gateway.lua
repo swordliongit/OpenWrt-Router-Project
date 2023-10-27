@@ -22,7 +22,7 @@ function Gateway.Get_gateway()
         gateway = string.gsub(gateway, "^%s*(.-)%s*$", "%1") -- trim leading/trailing whitespace
 
         -- Save the gateway so we can set this gateway when we reboot when dhcp client is off. ( Device doesn't auto initiate gw by default )
-        local file = io.open("/etc/project_master_modem/gateway_for_static", "w")
+        local file = io.open("/etc/project_master_modem/res/gateway_for_static", "w")
         if file then
             file:write("gateway:" .. gateway)
             file:close()

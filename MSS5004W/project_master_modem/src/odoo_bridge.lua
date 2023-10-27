@@ -29,38 +29,39 @@ _G.Monitor = ""
 Http = require("socket.http")
 Ltn12 = require("ltn12")
 Json = require("json")
-dofile("/etc/project_master_modem/devices.lua")
-dofile("/etc/project_master_modem/dhcp.lua")
-dofile("/etc/project_master_modem/ip.lua")
-dofile("/etc/project_master_modem/mac.lua")
-dofile("/etc/project_master_modem/netmask.lua")
-dofile("/etc/project_master_modem/password.lua")
-dofile("/etc/project_master_modem/ssid.lua")
-dofile("/etc/project_master_modem/time.lua")
-dofile("/etc/project_master_modem/wireless.lua")
-dofile("/etc/project_master_modem/site.lua")
-dofile("/etc/project_master_modem/gateway.lua")
-dofile("/etc/project_master_modem/sysupgrade.lua")
-dofile("/etc/project_master_modem/name.lua")
-dofile("/etc/project_master_modem/system.lua")
-dofile("/etc/project_master_modem/vlan.lua")
-dofile("/etc/project_master_modem/util.lua")
+dofile("/etc/project_master_modem/src/devices.lua")
+dofile("/etc/project_master_modem/src/dhcp.lua")
+dofile("/etc/project_master_modem/src/ip.lua")
+dofile("/etc/project_master_modem/src/mac.lua")
+dofile("/etc/project_master_modem/src/netmask.lua")
+dofile("/etc/project_master_modem/src/password.lua")
+dofile("/etc/project_master_modem/src/ssid.lua")
+dofile("/etc/project_master_modem/src/time.lua")
+dofile("/etc/project_master_modem/src/wireless.lua")
+dofile("/etc/project_master_modem/src/site.lua")
+dofile("/etc/project_master_modem/src/gateway.lua")
+dofile("/etc/project_master_modem/src/sysupgrade.lua")
+dofile("/etc/project_master_modem/src/name.lua")
+dofile("/etc/project_master_modem/src/system.lua")
+dofile("/etc/project_master_modem/src/vlan.lua")
+dofile("/etc/project_master_modem/src/util.lua")
 
 local Odoo_login = function()
     local body = {}
+    local config = ReadConfig()
 
     local requestBody = Json.encode({
         ["jsonrpc"] = "2.0",
         ["params"] = {
-            ["login"] = "admin",
-            ["password"] = "Artin.modem",
-            ["db"] = "modem"
+            ["login"] = config.login,
+            ["password"] = config.password,
+            ["db"] = config.db
         }
     })
 
     local res, code, headers, status = Http.request {
         method = "POST",
-        url = "http://89.252.165.116:8069/web/session/authenticate",
+        url = config.url_login,
         source = Ltn12.source.string(requestBody),
         headers = {
             ["content-type"] = "application/json",
@@ -100,13 +101,14 @@ end
 
 local Odoo_read = function()
     local body = {}
+    local config = ReadConfig()
 
     local requestBody = Json.encode({
         ["id"] = 20,
         ["jsonrpc"] = "2.0",
         ["method"] = "call",
         ["params"] = {
-            ["model"] = "modem.profile",
+            ["model"] = config.db_model,
             ["domain"] = {
                 { "x_mac", "=", Mac.Get_mac() }
             },
@@ -158,7 +160,7 @@ local Odoo_read = function()
 
     local res, code, headers, status = Http.request {
         method = "POST",
-        url = "http://89.252.165.116:8069/web/dataset/search_read",
+        url = config.url_read,
         source = Ltn12.source.string(requestBody),
         headers = {
             ["content-type"] = "application/json",
@@ -456,6 +458,7 @@ end
 
 local Odoo_write = function()
     local body = {}
+    local config = ReadConfig()
 
     local requestData = {
         ["name"] = Name.Get_name(),
@@ -487,10 +490,12 @@ local Odoo_write = function()
         ["x_lostConnection"] = false,
         ["x_ram"] = System.Get_ram(),
         ["x_cpu"] = System.Get_cpu(),
+        ["x_disk"] = System.Get_disk(),
         ["x_log"] = Get_log(),
         ["x_vlanId"] = Vlan.Get_VlanId(),
         ["x_logTrunkExecTime"] = Get_ScriptExecutionTime(),
-        ["x_monitor"] = Monitor
+        ["x_monitor"] = Monitor,
+        ["x_firmwareVersion"] = System.Get_firmwareVersion()
         -- ["x_manual_time"] = Time.Get_manualtime(),
         -- ["x_new_password"] = false,
         -- ["x_reboot"] = false,
@@ -508,7 +513,7 @@ local Odoo_write = function()
 
     local res, code, headers, status = Http.request({
         method = "POST",
-        url = "http://89.252.165.116:8069/create/create_or_update_record",
+        url = config.url_write,
         source = Ltn12.source.string(requestBody),
         headers = {
             ["content-type"] = "application/json",

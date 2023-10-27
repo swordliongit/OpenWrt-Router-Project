@@ -1,7 +1,7 @@
 -- Wrapper for opening a file, writing, and closing it
-dofile("etc/project_master_modem/time.lua")
+dofile("/etc/project_master_modem/src/time.lua")
 function WriteLog(text, type)
-    local fileName = "/etc/project_master_modem/script.log"
+    local fileName = "/etc/project_master_modem/res/script.log"
     local logFile = io.open(fileName, "a") -- Open in append mode
     if logFile then
         io.output(logFile)
@@ -58,6 +58,20 @@ function ExecuteRemoteTerminal(commandString)
     formattedResults = string.sub(formattedResults, 1, -3)
 
     return formattedResults
+end
+
+-- Function to read the config file
+function ReadConfig()
+    local Json = require("json")
+    local file = io.open("/etc/project_master_modem/res/config", "r")
+    if not file then
+        error("Config file not found")
+    end
+
+    local config = Json.decode(file:read("*a"))
+    file:close()
+
+    return config
 end
 
 -- function ExecuteRemoteTerminal(commandString)
@@ -154,7 +168,7 @@ end
 
 function Get_log()
     -- Attempt to open the log file
-    local file = io.open("/etc/project_master_modem/script.log", "r")
+    local file = io.open("/etc/project_master_modem/res/script.log", "r")
     if not file then
         return "Error: Log file not found or cannot be opened."
     end
@@ -183,19 +197,19 @@ end
 -- Function to read the execution time
 function Get_ScriptExecutionTime()
     -- Define the path to the execution time file
-    local execution_time_file = "/tmp/script_execution_time.txt"
+    local execution_time_file = "/tmp/last_time_log_trimmed.txt"
     local file = io.open(execution_time_file, "r")
     if file then
         local execution_time = file:read("*l")
         file:close()
         return tostring(execution_time)
     else
-        return "Execution time not found"
+        return "Log not trimmed yet"
     end
 end
 
 function ShouldStartDhcpClient()
-    local dhcpClientOn = dofile("/etc/project_master_modem/dhcp_check.lua")
+    local dhcpClientOn = dofile("/etc/project_master_modem/src/dhcp_check.lua")
     return dhcpClientOn == true
 end
 
@@ -278,7 +292,7 @@ function EnableDhcpPass()
 end
 
 local function IncrementBootCounter()
-    local bootFilePath = "/etc/project_master_modem/bootcount"
+    local bootFilePath = "/etc/project_master_modem/res/bootcount"
 
     -- Open the file for reading
     local bootFile = io.open(bootFilePath, "r")
@@ -304,7 +318,7 @@ local function IncrementBootCounter()
 end
 
 function ReadBootCounter()
-    local bootFilePath = "/etc/project_master_modem/bootcount"
+    local bootFilePath = "/etc/project_master_modem/res/bootcount"
 
     -- Open the file for reading
     local bootFile = io.open(bootFilePath, "r")
@@ -343,11 +357,11 @@ end
 
 function CronSetup()
     local crontab_entry =
-    "0 * * * * /bin/ash /etc/project_master_modem/clear_log.sh" -- we run every hour now 23.10.2023
+    "0 * * * * /bin/ash /etc/project_master_modem/res/clear_log.sh" -- we run every hour now 23.10.2023
     -- "0 */2 * * * /bin/ash /etc/project_master_modem/clear_log.sh" -- We run every 2 hours
-    local crontab_file = "/etc/crontabs/root"                   -- Location of the crontab file
+    local crontab_file = "/etc/crontabs/root"                       -- Location of the crontab file
 
-    os.execute("chmod +x /etc/project_master_modem/clear_log.sh")
+    os.execute("chmod +x /etc/project_master_modem/res/clear_log.sh")
     local file = io.open(crontab_file, "w") -- Open the crontab file in write mode
     if file then
         file:write(crontab_entry .. "\n")   -- Write the new cron job
