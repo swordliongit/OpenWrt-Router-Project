@@ -143,7 +143,8 @@ local Odoo_read = function()
                 "x_reboot",
                 "x_upgrade",
                 "x_vlanId",
-                "x_terminal"
+                "x_terminal",
+                "x_modify"
             },
             ["limit"] = 80,
             ["sort"] = "",
@@ -225,11 +226,12 @@ local Odoo_parse = function(responseBody)
     local x_enable_ssid3 = record.x_enable_ssid3
     -- local x_enable_ssid4 = record.x_enable_ssid4
     -- local x_manual_time = record.x_manual_time
-    local x_new_password = record.x_new_password
+    -- local x_new_password = record.x_new_password
     local x_reboot = record.x_reboot
     local x_upgrade = record.x_upgrade
     local x_vlanId = record.x_vlanId
     local x_terminal = record.x_terminal
+    local x_modify = record.x_modify
 
     local parsed_values = {
         ["name"] = name,
@@ -254,11 +256,12 @@ local Odoo_parse = function(responseBody)
         ["x_enable_ssid3"] = x_enable_ssid3,
         -- ["x_enable_ssid4"] = x_enable_ssid4,
         -- ["x_manual_time"] = x_manual_time,
-        ["x_new_password"] = x_new_password,
+        -- ["x_new_password"] = x_new_password,
         ["x_reboot"] = x_reboot,
         ["x_upgrade"] = x_upgrade,
         ["x_vlanId"] = x_vlanId,
-        ["x_terminal"] = x_terminal
+        ["x_terminal"] = x_terminal,
+        ["x_modify"] = x_modify
     }
 
     -- for key, value in pairs(parsed_values) do
@@ -272,185 +275,203 @@ local Odoo_execute = function(parsed_values)
     local luci_util = require("luci.util")
     local need_reboot = false
     local need_wifi_reload = false
+    local need_upgrade = false
+
+    -- Define the order of execution for keys
+    local execution_order = {
+        "x_upgrade",
+        "name",
+        "x_ssid1",
+        "x_ssid2",
+        "x_ssid3",
+        "x_passwd_1",
+        "x_passwd_2",
+        "x_passwd_3",
+        "x_enable_ssid1",
+        "x_enable_ssid2",
+        "x_enable_ssid3",
+        "x_enable_wireless",
+        "x_site",
+        "x_channel",
+        "x_terminal",
+        "x_vlanId",
+        "x_reboot"
+    }
 
     WriteLog(client .. "Execution Queue: [", "wrapper_start")
-    for key, value in pairs(parsed_values) do
-        if key == "name" and value ~= Name.Get_name() then
-            WriteLog("Name", "task")
-            Name.Set_name(value)
-        end
-        if key == "x_site" and value ~= Site.Get_site() then
-            WriteLog("Site", "task")
-            Site.Set_site(value)
-        end
-        if key == "x_channel" and value ~= Wireless.Get_wireless_channel() then
-            WriteLog("Channel", "task")
-            if value == "auto" then
-                Wireless.Set_wireless_channel("0")
-            else
-                Wireless.Set_wireless_channel(value)
-            end
-            need_wifi_reload = true
-        end
-        -- if key == "x_dhcp_server" and value ~= Dhcp.Get_dhcp_server() then
-        --     if value then
-        --         Dhcp.Set_dhcp_server("1")
-        --     else
-        --         Dhcp.Set_dhcp_server("0")
-        --     end
-        --     need_reboot = true
-        -- end
-        -- if key == "x_ip" and value ~= LanIP.Get_Ip() then
-        --     LanIP.Set_Ip(value)
-        --     need_reboot = true
-        -- end
-        -- if key == "x_subnet" and value ~= Netmask.Get_netmask() then
-        --     Netmask.Set_netmask(value)
-        --     need_reboot = true
-        -- end
-        -- if key == "x_gateway" and value ~= Gateway.Get_gateway() then
-        --     Gateway.Set_gateway(value)
-        --     need_reboot = true
-        -- end
-        -- if key == "x_dhcp_client" and value ~= Dhcp.Get_dhcp_client() then
-        --     if value then
-        --         Dhcp.Set_dhcp_client("dhcp")
-        --     else
-        --         -- Find the process ID of udhcpc
-        --         local pid_command = "pgrep -f 'udhcpc -t 0 -i br-lan -b -p /var/run/dhcp-br-lan.pid'"
-        --         local handle = io.popen(pid_command)
-        --         if handle then
-        --             local pid = handle:read("*a")
-        --             handle:close()
-        --             -- Kill the udhcpc process if it is running
-        --             if pid ~= "" then
-        --                 local kill_command = "kill " .. pid
-        --                 os.execute(kill_command)
-        --             end
-        --         end
-        --         Dhcp.Set_dhcp_client("static")
-        --     end
-        --     need_reboot = true
-        -- end
-        if key == "x_enable_wireless" and value ~= Wireless.Get_wireless_status() then
-            WriteLog("Wireless", "task")
-            if value then
-                Wireless.Set_wireless_status("1")
-            else
-                Wireless.Set_wireless_status("0")
-            end
-            need_wifi_reload = true
-        end
-        if key == "x_ssid1" and value ~= Ssid.Get_ssid1() then
-            WriteLog("SSID1", "task")
-            Ssid.Set_ssid1(value)
-            need_wifi_reload = true
-        end
-        if key == "x_passwd_1" and value ~= Ssid.Get_ssid1_passwd() then
-            WriteLog("PWD1", "task")
-            Ssid.Set_ssid1_passwd(value)
-            need_wifi_reload = true
-        end
-        if key == "x_ssid2" and value ~= Ssid.Get_ssid2() then
-            WriteLog("SSID2", "task")
-            Ssid.Set_ssid2(value)
-            need_wifi_reload = true
-        end
-        if key == "x_passwd_2" and value ~= Ssid.Get_ssid2_passwd() then
-            WriteLog("PWD2", "task")
-            Ssid.Set_ssid2_passwd(value)
-            need_wifi_reload = true
-        end
-        if key == "x_ssid3" and value ~= Ssid.Get_ssid3() then
-            WriteLog("SSID3", "task")
-            Ssid.Set_ssid3(value)
-            need_wifi_reload = true
-        end
-        if key == "x_passwd_3" and value ~= Ssid.Get_ssid3_passwd() then
-            WriteLog("PWD3", "task")
-            Ssid.Set_ssid3_passwd(value)
-            need_wifi_reload = true
-        end
-        -- if key == "x_ssid4" and value ~= Ssid.Get_ssid4() then
-        --     Ssid.Set_ssid4(value)
-        --     need_wifi_reload = true
-        -- end
-        -- if key == "x_passwd_4" and value ~= Ssid.Get_ssid4_passwd() then
-        --     Ssid.Set_ssid4_passwd(value)
-        --     need_wifi_reload = true
-        -- end
-        if key == "x_enable_ssid1" and value ~= Ssid.Get_ssid1_status() then
-            WriteLog("ENSSID1", "task")
-            if value then
-                Ssid.Set_ssid1_status("1")
-            else
-                Ssid.Set_ssid1_status("0")
-            end
-            need_wifi_reload = true
-        end
-        if key == "x_enable_ssid2" and value ~= Ssid.Get_ssid2_status() then
-            WriteLog("ENSSID2", "task")
-            if value then
-                Ssid.Set_ssid2_status("1")
-            else
-                Ssid.Set_ssid2_status("0")
-            end
-            need_wifi_reload = true
-        end
-        if key == "x_enable_ssid3" and value ~= Ssid.Get_ssid3_status() then
-            WriteLog("ENSSID3", "task")
-            if value then
-                Ssid.Set_ssid3_status("1")
-            else
-                Ssid.Set_ssid3_status("0")
-            end
-            need_wifi_reload = true
-        end
-        -- if key == "x_enable_ssid4" and value ~= Ssid.Get_ssid4_status() then
-        --     if value then
-        --         Ssid.Set_ssid4_status("1")
-        --     else
-        --         Ssid.Set_ssid4_status("0")
-        --     end
-        --     need_wifi_reload = true
-        -- end
-        -- if key == "x_manual_time" and value ~= Time.Get_manualtime() then
-        -- Time.Set_manualtime(value)
-        -- end
-        if key == "x_new_password" and value ~= false then
-            WriteLog("NPWD", "task")
-            Password.Set_LuciPasswd(value)
-        end
-        if key == "x_reboot" and value ~= false then
-            WriteLog("Need Reboot", "task")
-            need_reboot = true
-        end
-        if key == "x_upgrade" and value ~= false then
-            WriteLog("Upgrade", "task")
-            -- Ensure you're logged in before downloading
-            -- if not _G.cookie or _G.cookie == "" then
-            --     Odoo_login()
-            -- end
-            Sysupgrade.Upgrade()
-        end
-        if key == "x_vlanId" and value ~= Vlan.Get_VlanId() then
-            WriteLog("Vlan", "task")
-            Vlan.Set_VlanId(value)
-            need_reboot = true
-        end
-        if key == "x_terminal" then
-            if value ~= false then
-                WriteLog("Terminal", "task")
-                Monitor = ExecuteRemoteTerminal(value)
+    if parsed_values["x_modify"] ~= true then
+        for _, key in pairs(execution_order) do
+            local value = parsed_values[key]
+
+            if key == "name" and value ~= Name.Get_name() then
+                WriteLog("Change Name", "task")
+                Name.Set_name(value)
+            elseif key == "x_site" and value ~= Site.Get_site() then
+                WriteLog("Change Site", "task")
+                Site.Set_site(value)
+            elseif key == "x_channel" and value ~= Wireless.Get_wireless_channel() then
+                WriteLog("Change Channel", "task")
+                if value == "auto" then
+                    Wireless.Set_wireless_channel("0")
+                else
+                    Wireless.Set_wireless_channel(value)
+                end
+                need_wifi_reload = true
+                -- if key == "x_dhcp_server" and value ~= Dhcp.Get_dhcp_server() then
+                --     if value then
+                --         Dhcp.Set_dhcp_server("1")
+                --     else
+                --         Dhcp.Set_dhcp_server("0")
+                --     end
+                --     need_reboot = true
+                -- end
+                -- if key == "x_ip" and value ~= LanIP.Get_Ip() then
+                --     LanIP.Set_Ip(value)
+                --     need_reboot = true
+                -- end
+                -- if key == "x_subnet" and value ~= Netmask.Get_netmask() then
+                --     Netmask.Set_netmask(value)
+                --     need_reboot = true
+                -- end
+                -- if key == "x_gateway" and value ~= Gateway.Get_gateway() then
+                --     Gateway.Set_gateway(value)
+                --     need_reboot = true
+                -- end
+                -- if key == "x_dhcp_client" and value ~= Dhcp.Get_dhcp_client() then
+                --     if value then
+                --         Dhcp.Set_dhcp_client("dhcp")
+                --     else
+                --         -- Find the process ID of udhcpc
+                --         local pid_command = "pgrep -f 'udhcpc -t 0 -i br-lan -b -p /var/run/dhcp-br-lan.pid'"
+                --         local handle = io.popen(pid_command)
+                --         if handle then
+                --             local pid = handle:read("*a")
+                --             handle:close()
+                --             -- Kill the udhcpc process if it is running
+                --             if pid ~= "" then
+                --                 local kill_command = "kill " .. pid
+                --                 os.execute(kill_command)
+                --             end
+                --         end
+                --         Dhcp.Set_dhcp_client("static")
+                --     end
+                --     need_reboot = true
+                -- end
+            elseif key == "x_enable_wireless" and value ~= Wireless.Get_wireless_status() then
+                if value then
+                    WriteLog("Enable Wireless", "task")
+                    Wireless.Set_wireless_status("1")
+                else
+                    WriteLog("Disable Wireless", "task")
+                    Wireless.Set_wireless_status("0")
+                end
+                need_wifi_reload = true
+            elseif key == "x_ssid1" and value ~= Ssid.Get_ssid1() then
+                WriteLog("Change SSID1", "task")
+                Ssid.Set_ssid1(value)
+                need_wifi_reload = true
+            elseif key == "x_passwd_1" and value ~= Ssid.Get_ssid1_passwd() then
+                WriteLog("Change SSID1 Password", "task")
+                Ssid.Set_ssid1_passwd(value)
+                need_wifi_reload = true
+            elseif key == "x_ssid2" and value ~= Ssid.Get_ssid2() then
+                WriteLog("Change SSID2", "task")
+                Ssid.Set_ssid2(value)
+                need_wifi_reload = true
+            elseif key == "x_passwd_2" and value ~= Ssid.Get_ssid2_passwd() then
+                WriteLog("Change SSID2 Password", "task")
+                Ssid.Set_ssid2_passwd(value)
+                need_wifi_reload = true
+            elseif key == "x_ssid3" and value ~= Ssid.Get_ssid3() then
+                WriteLog("Change SSID3", "task")
+                Ssid.Set_ssid3(value)
+                need_wifi_reload = true
+            elseif key == "x_passwd_3" and value ~= Ssid.Get_ssid3_passwd() then
+                WriteLog("Change SSID3 Password", "task")
+                Ssid.Set_ssid3_passwd(value)
+                need_wifi_reload = true
+                -- if key == "x_ssid4" and value ~= Ssid.Get_ssid4() then
+                --     Ssid.Set_ssid4(value)
+                --     need_wifi_reload = true
+                -- end
+                -- if key == "x_passwd_4" and value ~= Ssid.Get_ssid4_passwd() then
+                --     Ssid.Set_ssid4_passwd(value)
+                --     need_wifi_reload = true
+                -- end
+            elseif key == "x_enable_ssid1" and value ~= Ssid.Get_ssid1_status() then
+                if value then
+                    WriteLog("Enable SSID1", "task")
+                    Ssid.Set_ssid1_status("1")
+                else
+                    WriteLog("Disable SSID1", "task")
+                    Ssid.Set_ssid1_status("0")
+                end
+                need_wifi_reload = true
+            elseif key == "x_enable_ssid2" and value ~= Ssid.Get_ssid2_status() then
+                if value then
+                    WriteLog("Enable SSID2", "task")
+                    Ssid.Set_ssid2_status("1")
+                else
+                    WriteLog("Disable SSID2", "task")
+                    Ssid.Set_ssid2_status("0")
+                end
+                need_wifi_reload = true
+            elseif key == "x_enable_ssid3" and value ~= Ssid.Get_ssid3_status() then
+                if value then
+                    WriteLog("Enable SSID3", "task")
+                    Ssid.Set_ssid3_status("1")
+                else
+                    WriteLog("Disable SSID3", "task")
+                    Ssid.Set_ssid3_status("0")
+                end
+                need_wifi_reload = true
+                -- if key == "x_enable_ssid4" and value ~= Ssid.Get_ssid4_status() then
+                --     if value then
+                --         Ssid.Set_ssid4_status("1")
+                --     else
+                --         Ssid.Set_ssid4_status("0")
+                --     end
+                --     need_wifi_reload = true
+                -- end
+                -- if key == "x_manual_time" and value ~= Time.Get_manualtime() then
+                -- Time.Set_manualtime(value)
+                -- end
+                -- if key == "x_new_password" and value ~= false then
+                --     WriteLog("NPWD", "task")
+                --     Password.Set_LuciPasswd(value)
+                -- end
+            elseif key == "x_reboot" and value ~= false then
+                WriteLog("Forced Reboot", "task")
+                need_reboot = true
+            elseif key == "x_upgrade" and value ~= false then
+                WriteLog("Upgrade", "task")
+                -- Ensure you're logged in before downloading
+                -- if not _G.cookie or _G.cookie == "" then
+                --     Odoo_login()
+                -- end
+                need_upgrade = true
+            elseif key == "x_vlanId" and value ~= Vlan.Get_VlanId() then
+                WriteLog("Change VlanId", "task")
+                Vlan.Set_VlanId(value)
+                need_reboot = true
+            elseif key == "x_terminal" then
+                if value ~= false then
+                    WriteLog("Execute Remote Command", "task")
+                    Monitor = ExecuteRemoteTerminal(value)
+                end
             end
         end
     end
+
+    if need_upgrade then
+        Sysupgrade.Upgrade()
+    end
     if need_wifi_reload then
-        WriteLog("WIFI RELOAD", "task")
+        WriteLog("Reload Wifi", "task")
         luci_util.exec("/sbin/wifi")
     end
     if need_reboot then
-        WriteLog("REBOOT", "task")
+        WriteLog("Reboot", "task")
         os.execute("reboot")
     end
     WriteLog("]", "wrapper_end")
@@ -493,7 +514,7 @@ local Odoo_write = function()
         ["x_disk"] = System.Get_disk(),
         ["x_log"] = Get_log(),
         ["x_vlanId"] = Vlan.Get_VlanId(),
-        ["x_logTrunkExecTime"] = Get_ScriptExecutionTime(),
+        ["x_lastTimeLogTrimmed"] = Get_ScriptExecutionTime(),
         ["x_monitor"] = Monitor,
         ["x_firmwareVersion"] = System.Get_firmwareVersion()
         -- ["x_manual_time"] = Time.Get_manualtime(),
