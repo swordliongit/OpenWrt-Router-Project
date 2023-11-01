@@ -46,6 +46,14 @@ dofile("/etc/project_master_modem/src/system.lua")
 dofile("/etc/project_master_modem/src/vlan.lua")
 dofile("/etc/project_master_modem/src/util.lua")
 
+function BRIDGE_CHECK(func, ...)
+    local success, result = pcall(func, ...)
+    if not success then
+        WriteLog(bridge .. "Error: " .. result)
+    end
+    return result
+end
+
 local Odoo_login = function()
     local body = {}
     local config = ReadConfig()
@@ -303,18 +311,18 @@ local Odoo_execute = function(parsed_values)
         for _, key in pairs(execution_order) do
             local value = parsed_values[key]
 
-            if key == "name" and value ~= Name.Get_name() then
+            if key == "name" and value ~= BRIDGE_CHECK(Name.Get_name) then
                 WriteLog("Change Name", "task")
-                Name.Set_name(value)
-            elseif key == "x_site" and value ~= Site.Get_site() then
+                BRIDGE_CHECK(Name.Set_name, value)
+            elseif key == "x_site" and value ~= BRIDGE_CHECK(Site.Get_site) then
                 WriteLog("Change Site", "task")
-                Site.Set_site(value)
-            elseif key == "x_channel" and value ~= Wireless.Get_wireless_channel() then
+                BRIDGE_CHECK(Site.Set_site, value)
+            elseif key == "x_channel" and value ~= BRIDGE_CHECK(Wireless.Get_wireless_channel) then
                 WriteLog("Change Channel", "task")
                 if value == "auto" then
-                    Wireless.Set_wireless_channel("0")
+                    BRIDGE_CHECK(Wireless.Set_wireless_channel, "0")
                 else
-                    Wireless.Set_wireless_channel(value)
+                    BRIDGE_CHECK(Wireless.Set_wireless_channel, value)
                 end
                 need_wifi_reload = true
                 -- if key == "x_dhcp_server" and value ~= Dhcp.Get_dhcp_server() then
@@ -357,38 +365,38 @@ local Odoo_execute = function(parsed_values)
                 --     end
                 --     need_reboot = true
                 -- end
-            elseif key == "x_enable_wireless" and value ~= Wireless.Get_wireless_status() then
+            elseif key == "x_enable_wireless" and value ~= BRIDGE_CHECK(Wireless.Get_wireless_status) then
                 if value then
                     WriteLog("Enable Wireless", "task")
-                    Wireless.Set_wireless_status("1")
+                    BRIDGE_CHECK(Wireless.Set_wireless_status, "1")
                 else
                     WriteLog("Disable Wireless", "task")
-                    Wireless.Set_wireless_status("0")
+                    BRIDGE_CHECK(Wireless.Set_wireless_status, "0")
                 end
                 need_wifi_reload = true
-            elseif key == "x_ssid1" and value ~= Ssid.Get_ssid1() then
+            elseif key == "x_ssid1" and value ~= BRIDGE_CHECK(Ssid.Get_ssid1) then
                 WriteLog("Change SSID1", "task")
-                Ssid.Set_ssid1(value)
+                BRIDGE_CHECK(Ssid.Set_ssid1, value)
                 need_wifi_reload = true
-            elseif key == "x_passwd_1" and value ~= Ssid.Get_ssid1_passwd() then
+            elseif key == "x_passwd_1" and value ~= BRIDGE_CHECK(Ssid.Get_ssid1_passwd) then
                 WriteLog("Change SSID1 Password", "task")
-                Ssid.Set_ssid1_passwd(value)
+                BRIDGE_CHECK(Ssid.Set_ssid1_passwd, value)
                 need_wifi_reload = true
-            elseif key == "x_ssid2" and value ~= Ssid.Get_ssid2() then
+            elseif key == "x_ssid2" and value ~= BRIDGE_CHECK(Ssid.Get_ssid2) then
                 WriteLog("Change SSID2", "task")
-                Ssid.Set_ssid2(value)
+                BRIDGE_CHECK(Ssid.Set_ssid2, value)
                 need_wifi_reload = true
-            elseif key == "x_passwd_2" and value ~= Ssid.Get_ssid2_passwd() then
+            elseif key == "x_passwd_2" and value ~= BRIDGE_CHECK(Ssid.Get_ssid2_passwd) then
                 WriteLog("Change SSID2 Password", "task")
-                Ssid.Set_ssid2_passwd(value)
+                BRIDGE_CHECK(Ssid.Set_ssid2_passwd, value)
                 need_wifi_reload = true
-            elseif key == "x_ssid3" and value ~= Ssid.Get_ssid3() then
+            elseif key == "x_ssid3" and value ~= BRIDGE_CHECK(Ssid.Get_ssid3) then
                 WriteLog("Change SSID3", "task")
-                Ssid.Set_ssid3(value)
+                BRIDGE_CHECK(Ssid.Set_ssid3, value)
                 need_wifi_reload = true
-            elseif key == "x_passwd_3" and value ~= Ssid.Get_ssid3_passwd() then
+            elseif key == "x_passwd_3" and value ~= BRIDGE_CHECK(Ssid.Get_ssid3_passwd) then
                 WriteLog("Change SSID3 Password", "task")
-                Ssid.Set_ssid3_passwd(value)
+                BRIDGE_CHECK(Ssid.Set_ssid3_passwd, value)
                 need_wifi_reload = true
                 -- if key == "x_ssid4" and value ~= Ssid.Get_ssid4() then
                 --     Ssid.Set_ssid4(value)
@@ -398,31 +406,31 @@ local Odoo_execute = function(parsed_values)
                 --     Ssid.Set_ssid4_passwd(value)
                 --     need_wifi_reload = true
                 -- end
-            elseif key == "x_enable_ssid1" and value ~= Ssid.Get_ssid1_status() then
+            elseif key == "x_enable_ssid1" and value ~= BRIDGE_CHECK(Ssid.Get_ssid1_status) then
                 if value then
                     WriteLog("Enable SSID1", "task")
-                    Ssid.Set_ssid1_status("1")
+                    BRIDGE_CHECK(Ssid.Set_ssid1_status, "1")
                 else
                     WriteLog("Disable SSID1", "task")
-                    Ssid.Set_ssid1_status("0")
+                    BRIDGE_CHECK(Ssid.Set_ssid1_status, "0")
                 end
                 need_wifi_reload = true
-            elseif key == "x_enable_ssid2" and value ~= Ssid.Get_ssid2_status() then
+            elseif key == "x_enable_ssid2" and value ~= BRIDGE_CHECK(Ssid.Get_ssid2_status) then
                 if value then
                     WriteLog("Enable SSID2", "task")
-                    Ssid.Set_ssid2_status("1")
+                    BRIDGE_CHECK(Ssid.Set_ssid2_status, "1")
                 else
                     WriteLog("Disable SSID2", "task")
-                    Ssid.Set_ssid2_status("0")
+                    BRIDGE_CHECK(Ssid.Set_ssid2_status, "0")
                 end
                 need_wifi_reload = true
-            elseif key == "x_enable_ssid3" and value ~= Ssid.Get_ssid3_status() then
+            elseif key == "x_enable_ssid3" and value ~= BRIDGE_CHECK(Ssid.Get_ssid3_status) then
                 if value then
                     WriteLog("Enable SSID3", "task")
-                    Ssid.Set_ssid3_status("1")
+                    BRIDGE_CHECK(Ssid.Set_ssid3_status, "1")
                 else
                     WriteLog("Disable SSID3", "task")
-                    Ssid.Set_ssid3_status("0")
+                    BRIDGE_CHECK(Ssid.Set_ssid3_status, "0")
                 end
                 need_wifi_reload = true
                 -- if key == "x_enable_ssid4" and value ~= Ssid.Get_ssid4_status() then
@@ -450,21 +458,21 @@ local Odoo_execute = function(parsed_values)
                 --     Odoo_login()
                 -- end
                 need_upgrade = true
-            elseif key == "x_vlanId" and value ~= Vlan.Get_VlanId() then
+            elseif key == "x_vlanId" and value ~= BRIDGE_CHECK(Vlan.Get_VlanId) then
                 WriteLog("Change VlanId", "task")
-                Vlan.Set_VlanId(value)
+                BRIDGE_CHECK(Vlan.Set_VlanId, value)
                 need_reboot = true
             elseif key == "x_terminal" then
                 if value ~= false then
                     WriteLog("Execute Remote Command", "task")
-                    Monitor = ExecuteRemoteTerminal(value)
+                    Monitor = BRIDGE_CHECK(ExecuteRemoteTerminal, value)
                 end
             end
         end
     end
 
     if need_upgrade then
-        Sysupgrade.Upgrade()
+        BRIDGE_CHECK(Sysupgrade.Upgrade)
     end
     if need_wifi_reload then
         WriteLog("Reload Wifi", "task")
@@ -482,41 +490,41 @@ local Odoo_write = function()
     local config = ReadConfig()
 
     local requestData = {
-        ["name"] = Name.Get_name(),
-        ["x_site"] = Site.Get_site(),
+        ["name"] = BRIDGE_CHECK(Name.Get_name),
+        ["x_site"] = BRIDGE_CHECK(Site.Get_site),
         -- ["x_device_update"] = false,
         -- ["x_update_date"] = Time.Get_updatetime(),  --> update time is now controlled through the web controller in Odoo server side
-        ["x_uptime"] = Time.Get_uptime(),
-        ["x_channel"] = Wireless.Get_wireless_channel(),
-        ["x_mac"] = Mac.Get_mac(),
-        ["x_device_info"] = Devices.Get_DevicesString(),
-        ["x_ip"] = LanIP.Get_Ip(),
-        ["x_subnet"] = Netmask.Get_netmask(),
-        ["x_gateway"] = Gateway.Get_gateway(),
+        ["x_uptime"] = BRIDGE_CHECK(Time.Get_uptime),
+        ["x_channel"] = BRIDGE_CHECK(Wireless.Get_wireless_channel),
+        ["x_mac"] = BRIDGE_CHECK(Mac.Get_mac),
+        ["x_device_info"] = BRIDGE_CHECK(Devices.Get_DevicesString),
+        ["x_ip"] = BRIDGE_CHECK(LanIP.Get_Ip),
+        ["x_subnet"] = BRIDGE_CHECK(Netmask.Get_netmask),
+        ["x_gateway"] = BRIDGE_CHECK(Gateway.Get_gateway),
         -- ["x_dhcp_server"] = Dhcp.Get_dhcp_server(),
         -- ["x_dhcp_client"] = Dhcp.Get_dhcp_client(),
-        ["x_enable_wireless"] = Wireless.Get_wireless_status(),
-        ["x_ssid1"] = Ssid.Get_ssid1(),
-        ["x_passwd_1"] = Ssid.Get_ssid1_passwd(),
-        ["x_ssid2"] = Ssid.Get_ssid2(),
-        ["x_passwd_2"] = Ssid.Get_ssid2_passwd(),
-        ["x_ssid3"] = Ssid.Get_ssid3(),
-        ["x_passwd_3"] = Ssid.Get_ssid3_passwd(),
+        ["x_enable_wireless"] = BRIDGE_CHECK(Wireless.Get_wireless_status),
+        ["x_ssid1"] = BRIDGE_CHECK(Ssid.Get_ssid1),
+        ["x_passwd_1"] = BRIDGE_CHECK(Ssid.Get_ssid1_passwd),
+        ["x_ssid2"] = BRIDGE_CHECK(Ssid.Get_ssid2),
+        ["x_passwd_2"] = BRIDGE_CHECK(Ssid.Get_ssid2_passwd),
+        ["x_ssid3"] = BRIDGE_CHECK(Ssid.Get_ssid3),
+        ["x_passwd_3"] = BRIDGE_CHECK(Ssid.Get_ssid3_passwd),
         -- ["x_ssid4"] = Ssid.Get_ssid4(),
         -- ["x_passwd_4"] = Ssid.Get_ssid4_passwd(),
-        ["x_enable_ssid1"] = Ssid.Get_ssid1_status(),
-        ["x_enable_ssid2"] = Ssid.Get_ssid2_status(),
-        ["x_enable_ssid3"] = Ssid.Get_ssid3_status(),
+        ["x_enable_ssid1"] = BRIDGE_CHECK(Ssid.Get_ssid1_status),
+        ["x_enable_ssid2"] = BRIDGE_CHECK(Ssid.Get_ssid2_status),
+        ["x_enable_ssid3"] = BRIDGE_CHECK(Ssid.Get_ssid3_status),
         -- ["x_enable_ssid4"] = Ssid.Get_ssid4_status(),
         ["x_lostConnection"] = false,
-        ["x_ram"] = System.Get_ram(),
-        ["x_cpu"] = System.Get_cpu(),
-        ["x_disk"] = System.Get_disk(),
-        ["x_log"] = Get_log(),
-        ["x_vlanId"] = Vlan.Get_VlanId(),
-        ["x_lastTimeLogTrimmed"] = Get_ScriptExecutionTime(),
+        ["x_ram"] = BRIDGE_CHECK(System.Get_ram),
+        ["x_cpu"] = BRIDGE_CHECK(System.Get_cpu),
+        ["x_disk"] = BRIDGE_CHECK(System.Get_disk),
+        ["x_log"] = BRIDGE_CHECK(Get_log),
+        ["x_vlanId"] = BRIDGE_CHECK(Vlan.Get_VlanId),
+        ["x_lastTimeLogTrimmed"] = BRIDGE_CHECK(Get_ScriptExecutionTime),
         ["x_monitor"] = Monitor,
-        ["x_firmwareVersion"] = System.Get_firmwareVersion()
+        ["x_firmwareVersion"] = BRIDGE_CHECK(System.Get_firmwareVersion)
         -- ["x_manual_time"] = Time.Get_manualtime(),
         -- ["x_new_password"] = false,
         -- ["x_reboot"] = false,
@@ -597,7 +605,7 @@ function Odoo_Connector()
 
     backoff_counter = 5
     repeat
-        auth_completed = Odoo_login()
+        auth_completed = BRIDGE_CHECK(Odoo_login)
         if auth_completed == false then
             WriteLog(bridge .. "Login backoff activated! Sleeping for " .. backoff_counter .. " seconds..")
             os.execute("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
@@ -613,7 +621,7 @@ function Odoo_Connector()
     -- Keep trying to write ourselves into Odoo until successful
     backoff_counter = 5
     repeat
-        write_completed = Odoo_write()
+        write_completed = BRIDGE_CHECK(Odoo_write)
         if write_completed == false then
             WriteLog(bridge .. "Initial write backoff activated! Sleeping for " .. backoff_counter .. " seconds..")
             os.execute("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
@@ -648,13 +656,14 @@ function Odoo_Connector()
         os.execute("echo 0 > /sys/class/leds/richerlink:green:system/brightness")
 
         -- Parse the read values and execute necessary modifications
-        Odoo_execute(Odoo_parse(read_response))
+        local parse_results = BRIDGE_CHECK(Odoo_parse, read_response)
+        Odoo_execute(parse_results)
 
         read_completed = false
         -- Keep trying to write ourselves into Odoo until successful
         backoff_counter = 5
         repeat
-            write_completed = Odoo_write()
+            write_completed = BRIDGE_CHECK(Odoo_write)
             if write_completed == false then
                 WriteLog(bridge .. "Write backoff activated! Sleeping for " .. backoff_counter .. " seconds..")
                 os.execute("echo 1 > /sys/class/leds/richerlink:green:system/brightness")

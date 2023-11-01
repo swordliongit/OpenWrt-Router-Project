@@ -3,10 +3,11 @@ dofile("/etc/project_master_modem/src/time.lua")
 function WriteLog(text, type)
     local fileName = "/etc/project_master_modem/res/script.log"
     local logFile = io.open(fileName, "a") -- Open in append mode
+    local success, time_result = pcall(Time.Get_currentTime)
     if logFile then
         io.output(logFile)
         if type == "wrapper_start" or type == nil then
-            io.write("\n\n" .. Time.Get_currentTime() .. text)
+            io.write("\n\n" .. time_result .. text)
         elseif type == "task" then
             io.write("->" .. text)
         elseif type == "wrapper_end" then
