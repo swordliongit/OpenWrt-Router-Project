@@ -37,74 +37,7 @@ function MASTER_CHECK(func, ...)
     end
 end
 
---[[
-    EXECUTION START
-]]
-MASTER_CHECK(function()
-    WriteLog(client .. "LOG START")
-end)
-
--- Power button red. It will turn green if we can read/write into Odoo.
--- DHCP PASS BLOCK
-MASTER_CHECK(function()
-    WriteLog(client .. "{DHCP PASS BLOCK}")
-    os.execute("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
-    EnableDhcpPass()
-    BootChecker()
-end)
-
--- UDHCPC Clear Block
-MASTER_CHECK(function()
-    WriteLog(client .. "{UDHCPC CLEAR BLOCK}")
-    os.execute("killall udhcpc")
-    os.execute("sleep 1")
-end)
-
--- Static IP Clear Block
-MASTER_CHECK(function()
-    WriteLog(client .. "{STATIC IP CLEAR BLOCK}")
-    if DhcpOn() then
-        ClearIpOnBridge()
-        WriteLog(client .. "DHCPC IP cleared")
-    end
-    os.execute("sleep 1")
-    ExecuteAndWait("/etc/init.d/network restart")
-end)
-
--- UDHCPC Start Block
-MASTER_CHECK(function()
-    WriteLog(client .. "{UDHCPC START BLOCK}")
-    local cable_fallback_counter = 5
-    while not HasInternet(pingIp) do
-        WriteLog(client .. "Trying to get ip")
-        if IsInterfacePluggedIn("eth1_0") then
-            StartUdhcpc()
-            os.execute("sleep 5")
-            if not HasInternet(pingIp) then
-                os.execute("killall udhcpc")
-            end
-        else
-            WriteLog(client .. "Internet Cable Unplugged on Eth1_0!")
-            if cable_fallback_counter >= 30 then
-                -- cable not fixed, reboot
-                os.execute("reboot")
-            end
-            cable_fallback_counter = cable_fallback_counter + 2
-        end
-        os.execute("sleep " .. cable_fallback_counter)
-    end
-    cable_fallback_counter = 5
-    WriteLog(client .. "Connection Established using UDHCPC")
-end)
-
-
-MASTER_CHECK(function()
-    AddIpToBridge()
-end)
-
--- Package Installation and Main Loop Init Block
-MASTER_CHECK(function()
-    WriteLog(client .. "{PACKAGE INSTALLATION AND LAUNCH BLOCK}")
+function PIALB()
     if HasInternet(pingIp) then
         -- Get the time for the device
         os.execute("ntpd -p 176.235.250.150")
@@ -184,5 +117,84 @@ MASTER_CHECK(function()
                 os.execute("reboot")
             end
         end
+    else
+        return false
     end
+end
+
+--[[
+    EXECUTION START
+]]
+MASTER_CHECK(function()
+    WriteLog(client .. "LOG START")
+end)
+
+-- Power button red. It will turn green if we can read/write into Odoo.
+-- DHCP PASS BLOCK
+MASTER_CHECK(function()
+    WriteLog(client .. "{DHCP PASS BLOCK}")
+    os.execute("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
+    EnableDhcpPass()
+    BootChecker()
+end)
+
+-- UDHCPC Clear Block
+MASTER_CHECK(function()
+    WriteLog(client .. "{UDHCPC CLEAR BLOCK}")
+    os.execute("killall udhcpc")
+    os.execute("sleep 1")
+end)
+
+-- Static IP Clear Block
+MASTER_CHECK(function()
+    WriteLog(client .. "{STATIC IP CLEAR BLOCK}")
+    if DhcpOn() then
+        ClearIpOnBridge()
+        WriteLog(client .. "DHCPC IP cleared")
+    end
+    os.execute("sleep 1")
+    ExecuteAndWait("/etc/init.d/network restart")
+end)
+
+-- UDHCPC Start Block
+MASTER_CHECK(function()
+    WriteLog(client .. "{UDHCPC START BLOCK}")
+    local cable_fallback_counter = 5
+    while not HasInternet(pingIp) do
+        WriteLog(client .. "Trying to get ip")
+        if IsInterfacePluggedIn("eth1_0") then
+            StartUdhcpc()
+            os.execute("sleep 5")
+            if not HasInternet(pingIp) then
+                os.execute("killall udhcpc")
+            end
+        else
+            WriteLog(client .. "Internet Cable Unplugged on Eth1_0!")
+            if cable_fallback_counter >= 30 then
+                -- cable not fixed, reboot
+                os.execute("reboot")
+            end
+            cable_fallback_counter = cable_fallback_counter + 2
+        end
+        os.execute("sleep " .. cable_fallback_counter)
+    end
+    cable_fallback_counter = 5
+    WriteLog(client .. "Connection Established using UDHCPC")
+end)
+
+MASTER_CHECK(function()
+    AddIpToBridge()
+end)
+
+-- Package Installation and Launch Block
+MASTER_CHECK(function()
+    WriteLog(client .. "{PACKAGE INSTALLATION AND LAUNCH BLOCK}")
+    local pialb_fallback = 0
+    repeat
+        if not PIALB() then
+            pialb_fallback = pialb_fallback + 1
+            os.execute("sleep " .. pialb_fallback)
+        end
+    until pialb_fallback == 5
+    os.execute("reboot") -- 5 tries done, no success, reboot
 end)
