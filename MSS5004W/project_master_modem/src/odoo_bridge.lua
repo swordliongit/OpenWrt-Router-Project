@@ -20,6 +20,7 @@ _G.cookie = "" -- global cookie
 _G.Serror_backoff_counter = 0
 _G.MAX_SERROR = 10
 _G.Monitor = ""
+_G.Prev_Read_Accepted = true
 -- local lfs = require("lfs")
 
 -- -- Get the current working directory
@@ -308,6 +309,7 @@ local Odoo_execute = function(parsed_values)
 
     WriteLog(client .. "Execution Queue: [", "wrapper_start")
     if parsed_values["x_modify"] ~= true then
+        _G.Prev_Read_Accepted = true
         for _, key in pairs(execution_order) do
             local value = parsed_values[key]
 
@@ -469,6 +471,8 @@ local Odoo_execute = function(parsed_values)
                 end
             end
         end
+    else
+        _G.Prev_Read_Accepted = false -- If we can't read, we won't write
     end
 
     if need_upgrade then
@@ -523,7 +527,8 @@ local Odoo_write = function()
         ["x_log"] = BRIDGE_CHECK(Get_log),
         ["x_vlanId"] = BRIDGE_CHECK(Vlan.Get_VlanId),
         ["x_lastTimeLogTrimmed"] = BRIDGE_CHECK(Get_ScriptExecutionTime),
-        ["x_monitor"] = Monitor,
+        ["x_monitor"] = _G.Monitor,
+        ["pra"] = _G.Prev_Read_Accepted,
         ["x_firmwareVersion"] = BRIDGE_CHECK(System.Get_firmwareVersion)
         -- ["x_manual_time"] = Time.Get_manualtime(),
         -- ["x_new_password"] = false,
