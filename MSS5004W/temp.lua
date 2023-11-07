@@ -1,27 +1,151 @@
+--[[
+Author: Kılıçarslan SIMSIKI
+
+Date Created: 20-05-2023
+Date Modified: 23-05-2023
+
+Description:
+All modification and duplication of this software is forbidden and licensed under Apache.
+]]
+
+
 Time = {}
 
-function Time.Get_currentTime()
-    -- Get the current time in seconds since the epoch
-    local os_time = os.time()
+function Time.Get_updatetime()
+    -- Get the current timestamp
+    local current_timestamp = os.time()
 
-    -- Add 3 hours (3 * 3600 seconds) to adjust for the timezone
-    os_time = os_time + 3 * 3600
+    -- Add 3 hours in seconds (3 hours * 3600 seconds/hour)
+    local adjusted_timestamp = current_timestamp + 3 * 3600
 
-    -- Convert to a table to extract date and time components
-    local time_table = os.date("*t", os_time)
-
-    -- Adjust day, month, and year if adding 3 hours exceeds 24 hours
-    if time_table.hour >= 24 then
-        time_table.hour = time_table.hour - 24
-        time_table.day = time_table.day + 1
+    -- Format the adjusted timestamp
+    local formatted_date = os.date("%d-%m-%Y %H:%M:%S", adjusted_timestamp)
+    if formatted_date then
+        return formatted_date
+    else
+        return "Failed to retrieve current time"
     end
-
-    -- Convert the adjusted time back to a date string in the desired format
-    local new_time_str = string.format("%02d.%02d.%04d %02d:%02d:%02d",
-        time_table.day, time_table.month, time_table.year,
-        time_table.hour, time_table.min, time_table.sec)
-
-    return "[" .. new_time_str .. "]"
 end
 
-print(Time.Get_currentTime())
+-- function Time.Get_manualtime()
+--     return os.date("%Y-%m-%d %H:%M:%S")
+-- end
+
+-- function Time.Set_manualtime(time)
+--     local command = string.format("date -s '%s'", time)
+--     os.execute(command)
+-- end
+
+function Time.Get_uptime()
+    local luci_sys = require("luci.sys")
+
+    local seconds = luci_sys.uptime()
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local remainingSeconds = seconds % 60
+
+    local uptimeString = ""
+
+    if hours > 0 then
+        uptimeString = uptimeString .. hours .. "h "
+    end
+
+    if minutes > 0 then
+        uptimeString = uptimeString .. minutes .. "m "
+    end
+
+    uptimeString = uptimeString .. remainingSeconds .. "s"
+
+    return uptimeString
+end
+
+function Time.Get_currentTime()
+    -- Sample current time in the format you provided
+    local current_time_str = os.date("%c")
+
+    -- Define a table to map month names to month numbers
+    local months = {
+        Jan = "01",
+        Feb = "02",
+        Mar = "03",
+        Apr = "04",
+        May = "05",
+        Jun = "06",
+        Jul = "07",
+        Aug = "08",
+        Sep = "09",
+        Oct = "10",
+        Nov = "11",
+        Dec = "12"
+    }
+
+    -- Extract the date and time components
+    local day, month, day_num, time, year = current_time_str:match("(%a+) (%a+) (%d+) (%d+:%d+:%d+) (%d+)")
+
+    -- Convert the month name to a number
+    local month_num = months[month]
+
+    -- Parse the time components (hours, minutes, and seconds)
+    local hours, minutes, seconds = time:match("(%d+):(%d+):(%d+)")
+
+    -- Add 3 hours and 50 minutes
+    hours = tonumber(hours) + 3
+    minutes = tonumber(minutes)
+
+    -- Ensure minutes do not exceed 59 and handle carryover
+    if minutes >= 60 then
+        hours = hours + 1
+        minutes = minutes - 60
+    end
+
+    -- Create a new time string with the adjusted time
+    local new_time = string.format("%s.%s.%s %02d:%02d:%02d", day_num, month_num, year, hours, minutes, seconds)
+
+    return "[" .. new_time .. "]"
+end
+
+--
+--
+--
+Sysupgrade = {}
+
+function Sysupgrade.Upgrade()
+    local url = "http://89.252.165.116:8069/web/content/45?download=true&access_token="
+    local filename = "new-firmware.bin"
+
+    local response = {}
+    local _, code, headers, status = Http.request {
+        url = url,
+        redirect = true,           -- Follow redirection
+        headers = {
+            ["Cookie"] = _G.cookie -- Include the session cookie
+        },
+        sink = Ltn12.sink.table(response),
+        timeout = 60, -- Set a timeout (adjust as needed)
+    }
+
+    if code == 200 then
+        local contentDisposition = headers["content-disposition"]
+        if contentDisposition and contentDisposition:match("filename=\"([^\"]+)\"") then
+            filename = contentDisposition:match("filename=\"([^\"]+)\"")
+        end
+
+        local file = io.open("/tmp/" .. filename, "wb")
+        if file then
+            for _, chunk in ipairs(response) do
+                local result, error_message = file:write(chunk)
+                if not result then
+                    WriteLog(client .. "Error writing to file: " .. error_message)
+                    file:close()
+                    return false
+                end
+            end
+            file:close()
+            WriteLog(client .. "File downloaded and saved: " .. filename)
+            local exitStatus = os.execute("sysupgrade -n /tmp/" .. filename)
+            return exitStatus
+        else
+            WriteLog(client .. "Error opening file for writing")
+        end
+    end
+end

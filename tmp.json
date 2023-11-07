@@ -1,0 +1,1 @@
+udhcpc -p /var/run/udhcpc-eth1_0.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0 -x hostname:MSS5004W-OWR -C -R -O staticroutes -n

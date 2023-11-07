@@ -1,47 +1,35 @@
-Json = require("json")
-Http = require("socket.http")
-Https = require("ssl.https")
+Sysupgrade = {}
 
-Ltn12 = require("ltn12")
+function Sysupgrade.Upgrade()
+    local url = "http://89.252.165.116:8069/web/content/45?download=true&access_token="
+    local filename = "new-firmware.bin"
 
-Http.TIMEOUT = 5
-
-local Odoo_login = function()
-    local body = {}
-
-    local requestBody = Json.encode({
-        ["jsonrpc"] = "2.0",
-        ["params"] = {
-            ["login"] = "admin",
-            ["password"] = "Artin.modem",
-            ["db"] = "modem"
-        }
-    })
-
-    local res, code, headers, status = Https.request {
-        method = "POST",
-        url = "https://modem.nitrawork.com/web/session/authenticate",
-        source = Ltn12.source.string(requestBody),
+    local response = {}
+    local _, code, headers = Http.request {
+        url = url,
+        redirect = true,           -- Follow redirection
         headers = {
-            ["content-type"] = "application/json",
-            ["content-length"] = tostring(#requestBody)
+            ["Cookie"] = _G.cookie -- Include the session cookie
         },
-        sink = Ltn12.sink.table(body),
-        protocol = "tlsv1_2"
+        sink = Ltn12.sink.table(response),
     }
 
-    local responseBody = table.concat(body)
-
     if code == 200 then
-        _G.cookie = headers["set-cookie"]:match("(.-);")
-        print(cookie .. "\n\n")
-        return true
+        local contentDisposition = headers["content-disposition"]
+        if contentDisposition and contentDisposition:match("filename=\"([^\"]+)\"") then
+            filename = contentDisposition:match("filename=\"([^\"]+)\"")
+        end
+
+        local file = io.open("/tmp/" .. filename, "wb")
+        if file then
+            file:write(table.concat(response))
+            file:close()
+            WriteLog(client .. "File downloaded and saved: " .. filename)
+            os.execute("sysupgrade -n tmp/" .. filename)
+        else
+            WriteLog(client .. "Error opening file for writing")
+        end
     else
-        print("Failed to authenticate. HTTP code: " ..
-            tostring(code) .. "\nResponse body:\n" .. responseBody .. "\n\n")
-        return false
+        WriteLog(server .. "HTTP request failed with status code: " .. code)
     end
 end
-
-
-Odoo_login()

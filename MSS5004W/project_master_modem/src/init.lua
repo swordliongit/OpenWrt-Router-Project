@@ -160,25 +160,30 @@ end)
 MASTER_CHECK(function()
     WriteLog(client .. "{UDHCPC START BLOCK}")
     local cable_fallback_counter = 5
+    local udhcpc_fallback_counter = 5
     while not HasInternet(pingIp) do
         WriteLog(client .. "Trying to get ip")
         if IsInterfacePluggedIn("eth1_0") then
             StartUdhcpc()
-            os.execute("sleep 5")
             if not HasInternet(pingIp) then
+                WriteLog(client .. "No IP from Upstream. UDHCPC Backoff Activated!")
                 os.execute("killall udhcpc")
+                udhcpc_fallback_counter = udhcpc_fallback_counter + 2
+                os.execute("sleep " .. udhcpc_fallback_counter)
             end
         else
-            WriteLog(client .. "Internet Cable Unplugged on Eth1_0!")
+            WriteLog(client .. "Internet Cable Unplugged on Eth1_0. Cable Backoff Activated!")
             if cable_fallback_counter >= 30 then
                 -- cable not fixed, reboot
                 os.execute("reboot")
             end
             cable_fallback_counter = cable_fallback_counter + 2
+            os.execute("sleep " .. cable_fallback_counter)
         end
-        os.execute("sleep " .. cable_fallback_counter)
+        if udhcpc_fallback_counter >= 15 then
+            os.execute("reboot")
+        end
     end
-    cable_fallback_counter = 5
     WriteLog(client .. "Connection Established using UDHCPC")
 end)
 

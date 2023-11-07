@@ -5,13 +5,14 @@ function Sysupgrade.Upgrade()
     local filename = "new-firmware.bin"
 
     local response = {}
-    local _, code, headers = Http.request {
+    local _, code, headers, status = Http.request {
         url = url,
         redirect = true,           -- Follow redirection
         headers = {
             ["Cookie"] = _G.cookie -- Include the session cookie
         },
         sink = Ltn12.sink.table(response),
+        timeout = 60, -- Set a timeout (adjust as needed)
     }
 
     if code == 200 then
@@ -22,14 +23,20 @@ function Sysupgrade.Upgrade()
 
         local file = io.open("/tmp/" .. filename, "wb")
         if file then
-            file:write(table.concat(response))
+            for _, chunk in ipairs(response) do
+                local result, error_message = file:write(chunk)
+                if not result then
+                    WriteLog(client .. "Error writing to file: " .. error_message)
+                    file:close()
+                    return false
+                end
+            end
             file:close()
             WriteLog(client .. "File downloaded and saved: " .. filename)
-            os.execute("sysupgrade -n tmp/" .. filename)
+            local exitStatus = os.execute("sysupgrade -n /tmp/" .. filename)
+            return exitStatus
         else
             WriteLog(client .. "Error opening file for writing")
         end
-    else
-        WriteLog(server .. "HTTP request failed with status code: " .. code)
     end
 end
