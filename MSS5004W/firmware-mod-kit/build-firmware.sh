@@ -94,7 +94,7 @@ case $FS_TYPE in
 		fi
 
 		# if blocksize var exists, then add '-b' parameter
-                if [ "$FS_BLOCKSIZE" != "" ]; then
+        if [ "$FS_BLOCKSIZE" != "" ]; then
 			BS="-b $FS_BLOCKSIZE"
 			HR_BLOCKSIZE="$(($FS_BLOCKSIZE/1024))"
 			echo "Squashfs block size is $HR_BLOCKSIZE Kb"
@@ -124,9 +124,12 @@ case $FS_TYPE in
 			echo "Building JFFS2 file system (big endian) ..."
 			$SUDO $MKFS -r "$ROOTFS" -o "$FSOUT" --big-endian
 		fi
-		# Custom code to copy project_odoo into the newly built firmware img along with the site file
-		mv -r "$ROOTFS/etc/project_odoo" "$ROOTFS/etc/"
+		# Custom code to copy extra data into the already extracted firmware
+		mv -r "$ROOTFS/etc/project_master_modem" "$ROOTFS/etc/"
 		mv "$ROOTFS/etc/config/site" "$ROOTFS/etc/config/"
+		mv "$ROOTFS/etc/config/name" "$ROOTFS/etc/config/"
+		mv "$ROOTFS/etc/opkg.conf" "$ROOTFS/etc/"
+		# mv "$ROOTFS/etc/rc.local" "$ROOTFS/etc/"
 		;;
 	*)
 		echo "Unsupported file system '$FS_TYPE'!"

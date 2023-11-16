@@ -17,6 +17,7 @@
 _G.server = " [SERVER] "
 _G.client = " [MSS5004W] "
 _G.bridge = " [BRIDGE] "
+_G.master = " [MASTER] "
 
 dofile("/etc/project_master_modem/src/util.lua")
 
@@ -46,75 +47,77 @@ function PIALB()
 
         local flagExists = io.open(flagFile) ~= nil
         if flagExists then
-            WriteLog(client .. "before lua init - flag on")
+            WriteLog(master .. "before lua init - flag on")
             -- Execute odoo_bridge.lua and capture errors to script.log
             local success, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
 
             -- Log any error messages
             if not success then
-                WriteLog(bridge .. "Error in odoo_bridge.lua: " .. error_message)
+                WriteLog(master .. "Error in odoo_bridge.lua: " .. error_message)
                 if error_message:match("not enough memory") then
                     os.execute("/etc/project_master_modem/res/clear_log.sh")
-                    WriteLog(bridge .. "Log trimmed, rebooting...")
+                    WriteLog(master .. "Log trimmed, rebooting...")
+                    os.execute("sleep 2")
+                    os.execute("reboot")
                 else
-                    WriteLog(bridge .. "Rebooting...")
+                    WriteLog(master .. error_message)
                 end
-                os.execute("sleep 2")
-                os.execute("reboot")
             end
         else
-            -- luasocket & libopenssl
-            -- changeOpkgEndpoint()
-            os.execute("opkg update")
-            os.execute("opkg install luasocket")
-            os.execute("opkg update")
-            -- os.execute(
-            --     "wget -P /tmp http://81.0.124.218/attitude_adjustment/12.09/ramips/rt305x/packages/luasocket_2.0.2-3_ramips.ipk")
-            os.execute(
-                "wget -P /tmp http://81.0.124.218/chaos_calmer/15.05.1/ramips/rt288x/packages/packages/json4lua_0.9.53-1_ramips.ipk")
-            -- os.execute(
-            --     "wget -P /tmp http://81.0.124.218/attitude_adjustment/12.09/ramips/rt305x/packages/luafilesystem_1.5.0-1_ramips.ipk")
-            -- os.execute(
-            --     "wget -P /tmp http://81.0.124.218/attitude_adjustment/12.09/ramips/rt305x/packages/openssh-sftp-server_6.1p1-1_ramips.ipk")
-            -- os.execute(
-            --     "wget -P /tmp http://81.0.124.218/attitude_adjustment/12.09/ramips/rt305x/packages/openssh-keygen_6.1p1-1_ramips.ipk")
-            -- os.execute(
-            --     "wget -P /tmp http://81.0.124.218/attitude_adjustment/12.09/ramips/rt305x/packages/openssh-server_6.1p1-1_ramips.ipk")
-            -- os.execute(
-            --     "wget -P /tmp http://81.0.124.218/attitude_adjustment/12.09/ramips/rt305x/packages/luasec_0.4-1_ramips.ipk"
-            -- )
-            -- os.execute("opkg install /tmp/luasocket_2.0.2-3_ramips.ipk")
-            os.execute("opkg install /tmp/json4lua_0.9.53-1_ramips.ipk")
-            -- os.execute("opkg install /tmp/luafilesystem_1.5.0-1_ramips.ipk")
-            -- os.execute("opkg install /tmp/openssh-sftp-server_6.1p1-1_ramips.ipk")
-            -- os.execute("opkg install /tmp/openssh-keygen_6.1p1-1_ramips.ipk")
-            -- os.execute("opkg install /tmp/openssh-server_6.1p1-1_ramips.ipk")
-            -- os.execute("opkg install /tmp/luasec_0.4-1_ramips.ipk")
+            local packages_installed = false
+            local luas_installed = false
+            local json4_installed = false
+            local PIALB_retry_counter = 0
+            repeat
+                if IsPackageInstalled("luasocket") then
+                    luas_installed = true
+                else
+                    luas_installed = false
+                    WriteLog(master .. "Trying to install luasocket...")
+                    os.execute("opkg update")
+                    os.execute("opkg install luasocket")
+                end
+                if IsPackageInstalled("json4lua") then
+                    json4_installed = true
+                else
+                    json4_installed = false
+                    WriteLog(master .. "Trying to install json4lua...")
+                    os.execute("opkg update")
+                    os.execute(
+                        "wget -P /tmp http://81.0.124.218/chaos_calmer/15.05.1/ramips/rt288x/packages/packages/json4lua_0.9.53-1_ramips.ipk")
+                    os.execute("opkg install /tmp/json4lua_0.9.53-1_ramips.ipk")
+                    os.remove("/tmp/json4lua_0.9.53-1_ramips.ipk")
+                end
+                if json4_installed and luas_installed then
+                    packages_installed = true
+                else
+                    packages_installed = false
+                    PIALB_retry_counter = PIALB_retry_counter + 1
+                end
+                if PIALB_retry_counter == 5 then
+                    WriteLog(master .. "Aborting Package Installation, rebooting...")
+                    os.execute("reboot")
+                end
+            until packages_installed
+            WriteLog(master .. "Package installation successful!")
 
-            -- os.remove("/tmp/luasocket_2.0.2-3_ramips.ipk")
-            os.remove("/tmp/json4lua_0.9.53-1_ramips.ipk")
-            -- os.remove("/tmp/luafilesystem_1.5.0-1_ramips.ipk")
-            -- os.remove("/tmp/openssh-sftp-server_6.1p1-1_ramips.ipk")
-            -- os.remove("/tmp/openssh-keygen_6.1p1-1_ramips.ipk")
-            -- os.remove("/tmp/openssh-server_6.1p1-1_ramips.ipk")
-            -- os.remove("/tmp/luasec_0.4-1_ramips.ipk")
 
             io.open(flagFile, "w"):close()
-            WriteLog(client .. "before lua init - flag off")
+            WriteLog(master .. "before lua init - flag off")
             -- Execute odoo_bridge.lua and capture errors to script.log
             local success, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
 
             -- Log any error messages
             if not success then
-                WriteLog(bridge .. "Error in odoo_bridge.lua: " .. error_message)
+                WriteLog(master .. "Error in odoo_bridge.lua: " .. error_message)
                 if error_message:match("not enough memory") then
                     os.execute("/etc/project_master_modem/res/clear_log.sh")
-                    WriteLog(bridge .. "Log trimmed, rebooting...")
+                    WriteLog(master .. "Log trimmed, rebooting...")
+                    os.execute("sleep 2")
+                    os.execute("reboot")
                 else
-                    WriteLog(bridge .. "Rebooting...")
+                    WriteLog(master .. error_message)
                 end
-                os.execute("sleep 2")
-                os.execute("reboot")
             end
         end
     else
@@ -126,13 +129,13 @@ end
     EXECUTION START
 ]]
 MASTER_CHECK(function()
-    WriteLog(client .. "LOG START")
+    WriteLog(master .. "LOG START")
 end)
 
 -- Power button red. It will turn green if we can read/write into Odoo.
 -- DHCP PASS BLOCK
 MASTER_CHECK(function()
-    WriteLog(client .. "{DHCP PASS BLOCK}")
+    WriteLog(master .. "{DHCP PASS BLOCK}")
     os.execute("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
     EnableDhcpPass()
     BootChecker()
@@ -140,17 +143,17 @@ end)
 
 -- UDHCPC Clear Block
 MASTER_CHECK(function()
-    WriteLog(client .. "{UDHCPC CLEAR BLOCK}")
+    WriteLog(master .. "{UDHCPC CLEAR BLOCK}")
     os.execute("killall udhcpc")
     os.execute("sleep 1")
 end)
 
 -- Static IP Clear Block
 MASTER_CHECK(function()
-    WriteLog(client .. "{STATIC IP CLEAR BLOCK}")
+    WriteLog(master .. "{STATIC IP CLEAR BLOCK}")
     if DhcpOn() then
         ClearIpOnBridge()
-        WriteLog(client .. "DHCPC IP cleared")
+        WriteLog(master .. "DHCPC IP cleared")
     end
     os.execute("sleep 1")
     ExecuteAndWait("/etc/init.d/network restart")
@@ -158,33 +161,33 @@ end)
 
 -- UDHCPC Start Block
 MASTER_CHECK(function()
-    WriteLog(client .. "{UDHCPC START BLOCK}")
+    WriteLog(master .. "{UDHCPC START BLOCK}")
     local cable_fallback_counter = 5
     local udhcpc_fallback_counter = 5
     while not HasInternet(pingIp) do
-        WriteLog(client .. "Trying to get ip")
+        WriteLog(master .. "Trying to get ip")
         if IsInterfacePluggedIn("eth1_0") then
             StartUdhcpc()
             if not HasInternet(pingIp) then
-                WriteLog(client .. "No IP from Upstream. UDHCPC Backoff Activated!")
+                WriteLog(master .. "No IP from Upstream. UDHCPC Backoff Activated!")
                 os.execute("killall udhcpc")
                 udhcpc_fallback_counter = udhcpc_fallback_counter + 2
                 os.execute("sleep " .. udhcpc_fallback_counter)
             end
         else
-            WriteLog(client .. "Internet Cable Unplugged on Eth1_0. Cable Backoff Activated!")
-            if cable_fallback_counter >= 30 then
+            WriteLog(master .. "Internet Cable Unplugged on Eth1_0. Cable Backoff Activated!")
+            if cable_fallback_counter >= 40 then
                 -- cable not fixed, reboot
                 os.execute("reboot")
             end
             cable_fallback_counter = cable_fallback_counter + 2
             os.execute("sleep " .. cable_fallback_counter)
         end
-        if udhcpc_fallback_counter >= 15 then
+        if udhcpc_fallback_counter >= 30 then
             os.execute("reboot")
         end
     end
-    WriteLog(client .. "Connection Established using UDHCPC")
+    WriteLog(master .. "Connection Established using UDHCPC")
 end)
 
 MASTER_CHECK(function()
@@ -193,7 +196,7 @@ end)
 
 -- Package Installation and Launch Block
 MASTER_CHECK(function()
-    WriteLog(client .. "{PACKAGE INSTALLATION AND LAUNCH BLOCK}")
+    WriteLog(master .. "{PACKAGE INSTALLATION AND LAUNCH BLOCK}")
     local pialb_fallback = 0
     repeat
         if not PIALB() then

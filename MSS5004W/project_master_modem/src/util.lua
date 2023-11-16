@@ -219,9 +219,49 @@ function HasInternet(pingIp)
 end
 
 function StartUdhcpc()
-    os.execute(
-        "udhcpc -p /var/run/udhcpc-eth1_0.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0 -x hostname:MSS5004W-OpenWrt -C -R -O staticroutes &>/dev/null &")
-    os.execute("sleep 1")
+    local master = " [MASTER] "
+    dofile("/etc/project_master_modem/src/vlan.lua")
+    dofile("/etc/project_master_modem/src/mac.lua")
+    -- dofile("/etc/project_master_modem/src/init.lua")
+    local vlanId = Vlan.Get_VlanId()
+    WriteLog(master .. "Vlan id: " .. vlanId)
+    local udhcpcCommand
+    if vlanId == "1" then
+        WriteLog(master .. "Trying UDHCPC on br-lan...")
+        udhcpcCommand =
+            "udhcpc -p /var/run/udhcpc-br-lan.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-lan -x hostname:MSS5004W-" ..
+            Mac.Get_mac() .. " -C -R -O staticroutes > /dev/null 2>&1 &"
+    else
+        WriteLog(master .. "Trying UDHCPC on eth1_0...")
+        udhcpcCommand =
+            "udhcpc -p /var/run/udhcpc-eth1_0.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0 -x hostname:MSS5004W-" ..
+            Mac.Get_mac() .. "-C -R -O staticroutes > /dev/null 2>&1 &"
+    end
+
+    os.execute(udhcpcCommand)
+    os.execute("sleep 10")
+    -- dofile("/etc/project_master_modem/src/vlan.lua")
+    -- local vlanId = Vlan.Get_VlanId()
+    -- WriteLog(master .. "Vlan id: " .. vlanId)
+    -- local udhcpcCommand
+    -- if vlanId == "1" then
+    --     WriteLog(master .. "Trying UDHCPC on br-lan...")
+    --     udhcpcCommand =
+    --     "udhcpc -p /var/run/udhcpc-br-lan.pid -s /usr/share/udhcpc/default.script -f -t 0 -i br-lan -x hostname:MSS5004W-OpenWrt -C -R -O staticroutes &>/dev/null &"
+    -- else
+    --     WriteLog(master .. "Trying UDHCPC on eth1_0...")
+    --     udhcpcCommand =
+    --     "udhcpc -p /var/run/udhcpc-eth1_0.pid -s /usr/share/udhcpc/default.script -f -t 0 -i eth1_0 -x hostname:MSS5004W-OpenWrt -C -R -O staticroutes &>/dev/null &"
+    -- end
+
+    -- local success, exitType, exitCode = os.execute(udhcpcCommand)
+    -- if success and exitType == "exit" and exitCode == 0 then
+    --     WriteLog(master .. "UDHCPC command executed successfully.")
+    -- else
+    --     WriteLog(master .. "UDHCPC command failed with exit code: " .. exitCode)
+    -- end
+
+    -- os.execute("sleep 1")
 end
 
 function DhcpOn()
@@ -261,25 +301,36 @@ end
 
 -- Function to add IP from eth1_0 to br-lan
 function AddIpToBridge()
-    local handle = io.popen("ifconfig eth1_0")
-    local output = handle:read("*a")
-    handle:close()
+    dofile("/etc/project_master_modem/src/vlan.lua")
 
-    local eth1_0_ip = output:match("inet addr:([%d%.]+)")
-    local eth1_0_netmask = output:match("Mask:([%d%.]+)")
+    local handle = nil
+    local output = nil
+    if Vlan.Get_VlanId() == "1" then
+        handle = io.popen("ifconfig br-lan")
+    else
+        handle = io.popen("ifconfig eth1_0")
+    end
 
-    if eth1_0_ip and eth1_0_netmask then
+    if handle then
+        output = handle:read("*a")
+        handle:close()
+    end
+
+    local ifconfig_ip = output:match("inet addr:([%d%.]+)")
+    local ifconfig_netmask = output:match("Mask:([%d%.]+)")
+
+    if ifconfig_ip and ifconfig_netmask then
         local uci = require("uci")
         local cursor = uci.cursor()
 
         -- Set the IP details for br-lan
-        cursor:set("network", "lan", "ipaddr", eth1_0_ip)
-        cursor:set("network", "lan", "netmask", eth1_0_netmask)
+        cursor:set("network", "lan", "ipaddr", ifconfig_ip)
+        cursor:set("network", "lan", "netmask", ifconfig_netmask)
 
         -- Commit the changes
         cursor:commit("network")
     else
-        WriteLog("Failed to retrieve IP address or netmask from eth1_0")
+        WriteLog("Failed to retrieve IP address or netmask from ifconfig")
     end
 end
 
@@ -372,6 +423,12 @@ function CronSetup()
     else
         WriteLog("Failed to open the crontab file")
     end
+end
+
+-- Function to check if a package is installed
+function IsPackageInstalled(packageName)
+    local cmd = string.format("opkg list-installed | grep -q '^%s -'", packageName)
+    return os.execute(cmd) == 0
 end
 
 -- local function changeOpkgEndpoint()

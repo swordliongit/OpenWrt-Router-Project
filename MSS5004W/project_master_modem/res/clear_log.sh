@@ -15,7 +15,7 @@ if [ -f "$LOG_FILE" ]; then
         BYTES_TO_KEEP=$((CURRENT_SIZE_BYTES * 80 / 100))
 
         # Use dd to truncate the log file while keeping 80% of its size
-        dd if="$LOG_FILE" of="$TMP_FILE" bs="$BYTES_TO_KEEP" count=1
+        dd if="$LOG_FILE" of="$TMP_FILE" bs="$BYTES_TO_KEEP" skip=1
         mv "$TMP_FILE" "$LOG_FILE"
         date +"%Y-%m-%d %H:%M:%S" > /tmp/last_time_log_trimmed.txt
         echo "File truncated."

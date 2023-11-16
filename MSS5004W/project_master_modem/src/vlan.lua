@@ -15,14 +15,14 @@ Vlan = {}
 local cursor = uci.cursor()
 
 function Vlan.Get_VlanId()
-    local vlanId
+    local vlanId = "1" -- Default VLAN ID is 1
 
     cursor:foreach("network", "interface", function(s)
         if s[".name"] == "lan" then
             local ifname = s["ifname"]
             local vlanPart = ifname:match("eth1_0%.(%d+)")
             if vlanPart then
-                vlanId = tonumber(vlanPart)
+                vlanId = vlanPart
             end
         end
     end)
@@ -31,32 +31,10 @@ function Vlan.Get_VlanId()
 end
 
 function Vlan.Set_VlanId(vlanId)
-    local filename = "/etc/config/network"
-    local file = io.open(filename, "r")
-    if not file then
-        return "Failed to open network configuration file"
-    end
-
-    local lines = {}
-    for line in file:lines() do
-        -- Modify the 'ifname' line to set the VLAN ID
-        if line:match("option%s+'ifname'") then
-            line = line:gsub("eth1_0.%d+", "eth1_0." .. vlanId)
-        end
-        table.insert(lines, line)
-    end
-    file:close()
-
-    local newFile = io.open(filename, "w")
-    if not newFile then
-        return "Failed to open network configuration file for writing"
-    end
-
-    for _, line in ipairs(lines) do
-        newFile:write(line, "\n")
-    end
-
-    newFile:close()
+    local ifname = (vlanId == "1") and "eth1_0" or string.format("eth1_0.%s", vlanId)
+    local command = string.format("uci set network.lan.ifname='%s eth1_1 eth1_2 eth1_3 ra0 ra1 ra2'", ifname)
+    os.execute(command)
+    os.execute("uci commit network")
 end
 
 -- Didn't work

@@ -86,20 +86,23 @@ local Odoo_login = function()
         -- Check for specific error conditions in the response body ( Odoo Server Error )
         if responseBody:find("Odoo Server Error") then
             -- Handle the server error condition here
-            WriteLog(server .. "ERROR: " .. responseBody)
-            if Serror_backoff_counter >= MAX_SERROR then
-                Serror_backoff_counter = 0
-                os.execute("reboot")
-            end
-            Serror_backoff_counter = Serror_backoff_counter + 1
-            WriteLog(bridge ..
-                "SERROR backoff activated! Rebooting in " .. tostring(MAX_SERROR - Serror_backoff_counter) .. " tries...")
+            WriteLog(server .. "Login ERROR: " .. responseBody)
+            return false
+            --     if Serror_backoff_counter >= MAX_SERROR then
+            --         Serror_backoff_counter = 0
+            --         os.execute("reboot")
+            --     end
+            --     Serror_backoff_counter = Serror_backoff_counter + 1
+            --     WriteLog(bridge ..
+            --         "SERROR backoff activated! Rebooting in " .. tostring(MAX_SERROR - Serror_backoff_counter) .. " tries...")
+            -- else
+            --     WriteLog(server .. responseBody)
+            --     Serror_backoff_counter = 0
         else
             _G.cookie = headers["set-cookie"]:match("(.-);")
             WriteLog(client .. cookie)
-            Serror_backoff_counter = 0
+            return true
         end
-        return true
     else
         WriteLog(server .. "Failed to authenticate. HTTP code: " ..
             tostring(code) .. "\nResponse body:\n" .. responseBody)
@@ -187,19 +190,21 @@ local Odoo_read = function()
         -- Check for specific error conditions in the response body ( Odoo Server Error )
         if responseBody:find("Odoo Server Error") then
             -- Handle the server error condition here
-            WriteLog(server .. "ERROR: " .. responseBody)
-            if Serror_backoff_counter >= MAX_SERROR then
-                Serror_backoff_counter = 0
-                os.execute("reboot")
-            end
-            Serror_backoff_counter = Serror_backoff_counter + 1
-            WriteLog(bridge ..
-                "SERROR backoff activated! Rebooting in " .. tostring(MAX_SERROR - Serror_backoff_counter) .. " tries...")
+            WriteLog(server .. "Read ERROR: " .. responseBody)
+            return false
+            --     if Serror_backoff_counter >= MAX_SERROR then
+            --         Serror_backoff_counter = 0
+            --         os.execute("reboot")
+            --     end
+            --     Serror_backoff_counter = Serror_backoff_counter + 1
+            --     WriteLog(bridge ..
+            --         "SERROR backoff activated! Rebooting in " .. tostring(MAX_SERROR - Serror_backoff_counter) .. " tries...")
+            -- else
+            --     WriteLog(server .. responseBody)
+            --     Serror_backoff_counter = 0
         else
-            WriteLog(server .. responseBody)
-            Serror_backoff_counter = 0
+            return true, responseBody
         end
-        return true, responseBody
     else
         WriteLog(server ..
             "Failed to fetch data. HTTP code: " .. tostring(code) .. "\nResponse body:\n" .. responseBody)
@@ -478,14 +483,16 @@ local Odoo_execute = function(parsed_values)
     if need_upgrade then
         BRIDGE_CHECK(Sysupgrade.Upgrade)
     end
+    if need_reboot then
+        WriteLog("Reboot", "task")
+        return true
+        -- os.execute("reboot")
+    end
     if need_wifi_reload then
         WriteLog("Reload Wifi", "task")
         luci_util.exec("/sbin/wifi")
     end
-    if need_reboot then
-        WriteLog("Reboot", "task")
-        os.execute("reboot")
-    end
+
     WriteLog("]", "wrapper_end")
 end
 
@@ -564,19 +571,21 @@ local Odoo_write = function()
         -- Check for specific error conditions in the response body ( Odoo Server Error )
         if responseBody:find("Odoo Server Error") then
             -- Handle the server error condition here
-            WriteLog(server .. "ERROR: " .. responseBody)
-            if Serror_backoff_counter >= MAX_SERROR then
-                Serror_backoff_counter = 0
-                os.execute("reboot")
-            end
-            Serror_backoff_counter = Serror_backoff_counter + 1
-            WriteLog(bridge ..
-                "SERROR backoff activated! Rebooting in " .. tostring(MAX_SERROR - Serror_backoff_counter) .. " tries...")
+            WriteLog(server .. "Write ERROR: " .. responseBody)
+            return false
+            --     if Serror_backoff_counter >= MAX_SERROR then
+            --         Serror_backoff_counter = 0
+            --         os.execute("reboot")
+            --     end
+            --     Serror_backoff_counter = Serror_backoff_counter + 1
+            --     WriteLog(bridge ..
+            --         "SERROR backoff activated! Rebooting in " .. tostring(MAX_SERROR - Serror_backoff_counter) .. " tries...")
+            -- else
+            --     WriteLog(server .. responseBody)
+            --     Serror_backoff_counter = 0
         else
-            WriteLog(server .. responseBody)
-            Serror_backoff_counter = 0
+            return true
         end
-        return true
     else
         WriteLog(server ..
             "Failed to post data. HTTP code: " .. tostring(code) .. "\nResponse body:\n" .. responseBody)
@@ -603,6 +612,8 @@ function Odoo_Connector()
     local write_completed = false
     local read_completed = false
     local read_response = nil
+    -- Flag to indicate if a reboot is required
+    local reboot_required = false
     -- local flag_Logdeleter = 0
     -- Add the public IP
     -- LanIP.AddIpToBridge()
@@ -642,6 +653,7 @@ function Odoo_Connector()
     write_completed = false
 
     -- Main program loop
+
     while true do
         os.execute("sleep 15")
         -- Keep trying to read data from Odoo until successful
@@ -662,7 +674,10 @@ function Odoo_Connector()
 
         -- Parse the read values and execute necessary modifications
         local parse_results = BRIDGE_CHECK(Odoo_parse, read_response)
-        Odoo_execute(parse_results)
+        if Odoo_execute(parse_results) then
+            reboot_required = true
+            break -- Reboot signal received, break
+        end
 
         read_completed = false
         -- Keep trying to write ourselves into Odoo until successful
@@ -682,13 +697,9 @@ function Odoo_Connector()
         os.execute("echo 0 > /sys/class/leds/richerlink:green:system/brightness")
 
         write_completed = false
-
-        -- flag_Logdeleter = flag_Logdeleter + 1
-        -- -- Clear the log file every 45 mins so it doesn't swell the RAM
-        -- if flag_Logdeleter == 30 then
-        --     flag_Logdeleter = 0
-        --     Log_deleter()
-        -- end
+    end
+    if reboot_required then
+        os.execute("reboot")
     end
 end
 
