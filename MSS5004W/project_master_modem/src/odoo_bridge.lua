@@ -613,7 +613,6 @@ function Odoo_Connector()
     local read_completed = false
     local read_response = nil
     -- Flag to indicate if a reboot is required
-    local reboot_required = false
     -- local flag_Logdeleter = 0
     -- Add the public IP
     -- LanIP.AddIpToBridge()
@@ -628,7 +627,7 @@ function Odoo_Connector()
             os.execute("sleep " .. tostring(backoff_counter))
             backoff_counter = backoff_counter + 2
             if backoff_counter >= 30 then
-                os.execute("reboot")
+                return true
             end
         end
     until auth_completed
@@ -644,7 +643,7 @@ function Odoo_Connector()
             os.execute("sleep " .. tostring(backoff_counter))
             backoff_counter = backoff_counter + 2
             if backoff_counter >= 30 then
-                os.execute("reboot")
+                return true
             end
         end
     until write_completed
@@ -666,7 +665,7 @@ function Odoo_Connector()
                 os.execute("sleep " .. tostring(backoff_counter))
                 backoff_counter = backoff_counter + 2
                 if backoff_counter >= 30 then
-                    os.execute("reboot")
+                    return true
                 end
             end
         until read_completed
@@ -675,8 +674,7 @@ function Odoo_Connector()
         -- Parse the read values and execute necessary modifications
         local parse_results = BRIDGE_CHECK(Odoo_parse, read_response)
         if Odoo_execute(parse_results) then
-            reboot_required = true
-            break -- Reboot signal received, break
+            return true -- Reboot signal received, break
         end
 
         read_completed = false
@@ -690,7 +688,7 @@ function Odoo_Connector()
                 os.execute("sleep " .. tostring(backoff_counter))
                 backoff_counter = backoff_counter + 2
                 if backoff_counter >= 30 then
-                    os.execute("reboot")
+                    return true
                 end
             end
         until write_completed
@@ -698,9 +696,6 @@ function Odoo_Connector()
 
         write_completed = false
     end
-    if reboot_required then
-        os.execute("reboot")
-    end
 end
 
-Odoo_Connector()
+return Odoo_Connector()

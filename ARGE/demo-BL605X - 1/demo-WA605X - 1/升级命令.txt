@@ -1,0 +1,11 @@
+uboot下升级：
+
+
+
+setenv machid 8040004
+saveenv
+setenv ipaddr 192.168.1.1
+setenv serverip 192.168.1.10 
+tftpboot nand-ipq5018-single.img
+imgaddr=$fileaddr 
+source $imgaddr:script 

@@ -49,7 +49,11 @@ function PIALB()
         if flagExists then
             WriteLog(master .. "before lua init - flag on")
             -- Execute odoo_bridge.lua and capture errors to script.log
-            local success, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
+            local success, reboot_required, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
+
+            if reboot_required then
+                return true
+            end
 
             -- Log any error messages
             if not success then
@@ -58,7 +62,7 @@ function PIALB()
                     os.execute("/etc/project_master_modem/res/clear_log.sh")
                     WriteLog(master .. "Log trimmed, rebooting...")
                     os.execute("sleep 2")
-                    os.execute("reboot")
+                    return true
                 else
                     WriteLog(master .. error_message)
                 end
@@ -96,7 +100,7 @@ function PIALB()
                 end
                 if PIALB_retry_counter == 5 then
                     WriteLog(master .. "Aborting Package Installation, rebooting...")
-                    os.execute("reboot")
+                    return true
                 end
             until packages_installed
             WriteLog(master .. "Package installation successful!")
@@ -105,7 +109,11 @@ function PIALB()
             io.open(flagFile, "w"):close()
             WriteLog(master .. "before lua init - flag off")
             -- Execute odoo_bridge.lua and capture errors to script.log
-            local success, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
+            local success, reboot_required, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
+
+            if reboot_required then
+                return true
+            end
 
             -- Log any error messages
             if not success then
@@ -114,7 +122,7 @@ function PIALB()
                     os.execute("/etc/project_master_modem/res/clear_log.sh")
                     WriteLog(master .. "Log trimmed, rebooting...")
                     os.execute("sleep 2")
-                    os.execute("reboot")
+                    return true
                 else
                     WriteLog(master .. error_message)
                 end
@@ -198,11 +206,16 @@ end)
 MASTER_CHECK(function()
     WriteLog(master .. "{PACKAGE INSTALLATION AND LAUNCH BLOCK}")
     local pialb_fallback = 0
+    local state
     repeat
-        if not PIALB() then
+        state = PIALB()
+        if not state then
+            WriteLog(master .. "PIALB Fallback activated!")
             pialb_fallback = pialb_fallback + 1
             os.execute("sleep " .. pialb_fallback)
+        else
+            break -- Reboot signal received
         end
     until pialb_fallback == 5
-    os.execute("reboot") -- 5 tries done, no success, reboot
+    os.execute("reboot") -- 5 tries done, no success OR reboot signal received from child processes
 end)

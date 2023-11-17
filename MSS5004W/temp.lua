@@ -21,7 +21,7 @@ function StartUdhcpc()
     local handle = io.popen(udhcpcCommand)
     local result = handle:read("*a")
     handle:close()
-    os.execute("sleep 2")
+    os.execute("sleep 2") 
 end
 
 StartUdhcpc()
