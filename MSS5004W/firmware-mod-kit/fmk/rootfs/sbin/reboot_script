@@ -1,3 +1,0 @@
-#!/bin/sh
-
-reboot -d 5 &

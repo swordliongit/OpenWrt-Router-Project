@@ -217,7 +217,7 @@ function ShouldStartDhcpClient()
 end
 
 function HasInternet(pingIp)
-    return luci.sys.call("ping -c 1 " .. pingIp .. " >/dev/null 2>&1") == 0
+    return os.execute("ping -c 1 " .. pingIp .. " >/dev/null 2>&1") == 0
 end
 
 function StartUdhcpc()
@@ -240,8 +240,8 @@ function StartUdhcpc()
             Mac.Get_mac() .. "-C -R -O staticroutes > /dev/null 2>&1 &"
     end
 
-    luci.sys.call(udhcpcCommand)
-    luci.sys.call("sleep 10")
+    os.execute(udhcpcCommand)
+    os.execute("sleep 10")
     -- dofile("/etc/project_master_modem/src/vlan.lua")
     -- local vlanId = Vlan.Get_VlanId()
     -- WriteLog(master .. "Vlan id: " .. vlanId)
@@ -414,18 +414,17 @@ end
 
 function CronSetup()
     local crontab_entry =
-    "*/20 * * * * /bin/ash /etc/project_master_modem/res/clear_log.sh" -- we run every 20 mins now 23.11.2023
-    -- "0 * * * * /bin/ash /etc/project_master_modem/res/clear_log.sh" -- we run every hour now 23.10.2023
+    "0 * * * * /bin/ash /etc/project_master_modem/res/clear_log.sh" -- we run every hour now 23.10.2023
     -- "0 */2 * * * /bin/ash /etc/project_master_modem/clear_log.sh" -- We run every 2 hours
-    local crontab_file = "/etc/crontabs/root" -- Location of the crontab file
+    local crontab_file = "/etc/crontabs/root"                       -- Location of the crontab file
 
-    luci.sys.call("chmod +x /etc/project_master_modem/res/clear_log.sh")
+    os.execute("chmod +x /etc/project_master_modem/res/clear_log.sh")
     local file = io.open(crontab_file, "w") -- Open the crontab file in write mode
     if file then
         file:write(crontab_entry .. "\n")   -- Write the new cron job
         file:close()                        -- Close the file
         -- Restart the cron service (optional, if needed)
-        luci.sys.call("/etc/init.d/cron restart")
+        os.execute("/etc/init.d/cron restart")
     else
         WriteLog("Failed to open the crontab file")
     end
@@ -434,7 +433,7 @@ end
 -- Function to check if a package is installed
 function IsPackageInstalled(packageName)
     local cmd = string.format("opkg list-installed | grep -q '^%s -'", packageName)
-    return luci.sys.call(cmd) == 0
+    return os.execute(cmd) == 0
 end
 
 -- local function changeOpkgEndpoint()

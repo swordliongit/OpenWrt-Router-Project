@@ -42,33 +42,31 @@ end
 function PIALB()
     if HasInternet(pingIp) then
         -- Get the time for the device
-        luci.sys.call("ntpd -p 176.235.250.150")
-        luci.sys.call("sleep 1")
-        luci.sys.call("/etc/init.d/sysntpd start")
+        os.execute("ntpd -p 176.235.250.150")
+        os.execute("sleep 1")
+        os.execute("/etc/init.d/sysntpd start")
 
         local flagExists = io.open(flagFile) ~= nil
         if flagExists then
             WriteLog(master .. "before lua init - flag on")
             -- Execute odoo_bridge.lua and capture errors to script.log
-            local success, result = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
-            -- WriteLog(master .. " " .. tostring(success) .. " " .. tostring(result))
+            local success, reboot_required, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
+            WriteLog(master .. " " .. success .. " " .. reboot_required)
+            if reboot_required then
+                WriteLog(master .. "Elevating reboot signal to Initiator")
+                return true
+            end
 
             -- Log any error messages
             if not success then
-                WriteLog(master .. "Error in odoo_bridge.lua: " .. result)
-                if result:match("not enough memory") then
-                    luci.sys.call("/etc/project_master_modem/res/clear_log.sh")
+                WriteLog(master .. "Error in odoo_bridge.lua: " .. error_message)
+                if error_message:match("not enough memory") then
+                    os.execute("/etc/project_master_modem/res/clear_log.sh")
                     WriteLog(master .. "Log trimmed, rebooting...")
-                    luci.sys.call("sleep 2")
+                    os.execute("sleep 2")
                     return true
                 else
-                    WriteLog(master .. result)
-                    return false
-                end
-            else
-                if result then
-                    WriteLog(master .. "Elevating reboot signal to Initiator")
-                    return true
+                    WriteLog(master .. error_message)
                 end
             end
         else
@@ -82,18 +80,18 @@ function PIALB()
                 else
                     luas_installed = false
                     WriteLog(master .. "Trying to install luasocket...")
-                    luci.sys.call("opkg update")
-                    luci.sys.call("opkg install luasocket")
+                    os.execute("opkg update")
+                    os.execute("opkg install luasocket")
                 end
                 if IsPackageInstalled("json4lua") then
                     json4_installed = true
                 else
                     json4_installed = false
                     WriteLog(master .. "Trying to install json4lua...")
-                    luci.sys.call("opkg update")
-                    luci.sys.call(
+                    os.execute("opkg update")
+                    os.execute(
                         "wget -P /tmp http://81.0.124.218/chaos_calmer/15.05.1/ramips/rt288x/packages/packages/json4lua_0.9.53-1_ramips.ipk")
-                    luci.sys.call("opkg install /tmp/json4lua_0.9.53-1_ramips.ipk")
+                    os.execute("opkg install /tmp/json4lua_0.9.53-1_ramips.ipk")
                     os.remove("/tmp/json4lua_0.9.53-1_ramips.ipk")
                 end
                 if json4_installed and luas_installed then
@@ -113,25 +111,23 @@ function PIALB()
             io.open(flagFile, "w"):close()
             WriteLog(master .. "before lua init - flag off")
             -- Execute odoo_bridge.lua and capture errors to script.log
-            local success, result = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
-            -- WriteLog(master .. " " .. tostring(success) .. " " .. tostring(result))
+            local success, reboot_required, error_message = pcall(dofile, "/etc/project_master_modem/src/odoo_bridge.lua")
+            WriteLog(master .. " " .. success .. " " .. reboot_required)
+            if reboot_required then
+                WriteLog(master .. "Elevating reboot signal to Initiator")
+                return true
+            end
 
             -- Log any error messages
             if not success then
-                WriteLog(master .. "Error in odoo_bridge.lua: " .. result)
-                if result:match("not enough memory") then
-                    luci.sys.call("/etc/project_master_modem/res/clear_log.sh")
+                WriteLog(master .. "Error in odoo_bridge.lua: " .. error_message)
+                if error_message:match("not enough memory") then
+                    os.execute("/etc/project_master_modem/res/clear_log.sh")
                     WriteLog(master .. "Log trimmed, rebooting...")
-                    luci.sys.call("sleep 2")
+                    os.execute("sleep 2")
                     return true
                 else
-                    WriteLog(master .. result)
-                    return false
-                end
-            else
-                if result then
-                    WriteLog(master .. "Elevating reboot signal to Initiator")
-                    return true
+                    WriteLog(master .. error_message)
                 end
             end
         end
@@ -151,7 +147,7 @@ end)
 -- DHCP PASS BLOCK
 MASTER_CHECK(function()
     WriteLog(master .. "{DHCP PASS BLOCK}")
-    luci.sys.call("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
+    os.execute("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
     EnableDhcpPass()
     BootChecker()
 end)
@@ -159,8 +155,8 @@ end)
 -- UDHCPC Clear Block
 MASTER_CHECK(function()
     WriteLog(master .. "{UDHCPC CLEAR BLOCK}")
-    luci.sys.call("killall udhcpc")
-    luci.sys.call("sleep 1")
+    os.execute("killall udhcpc")
+    os.execute("sleep 1")
 end)
 
 -- Static IP Clear Block
@@ -170,7 +166,7 @@ MASTER_CHECK(function()
         ClearIpOnBridge()
         WriteLog(master .. "DHCPC IP cleared")
     end
-    luci.sys.call("sleep 1")
+    os.execute("sleep 1")
     ExecuteAndWait("/etc/init.d/network restart")
 end)
 
@@ -185,9 +181,9 @@ MASTER_CHECK(function()
             StartUdhcpc()
             if not HasInternet(pingIp) then
                 WriteLog(master .. "No IP from Upstream. UDHCPC Backoff Activated!")
-                luci.sys.call("killall udhcpc")
+                os.execute("killall udhcpc")
                 udhcpc_fallback_counter = udhcpc_fallback_counter + 1
-                luci.sys.call("sleep 5")
+                os.execute("sleep 5")
             end
         else
             WriteLog(master .. "Internet Cable Unplugged on Eth1_0. Cable Backoff Activated!")
@@ -196,7 +192,7 @@ MASTER_CHECK(function()
                 luci.sys.reboot()
             end
             cable_fallback_counter = cable_fallback_counter + 2
-            luci.sys.call("sleep " .. cable_fallback_counter)
+            os.execute("sleep " .. cable_fallback_counter)
         end
         if udhcpc_fallback_counter >= 4 then
             WriteLog(master .. "UDHCPC Backoff Rebooting...")
@@ -220,17 +216,12 @@ MASTER_CHECK(function()
         if not state then
             WriteLog(master .. "PIALB Fallback activated!")
             pialb_fallback = pialb_fallback + 1
-            luci.sys.call("sleep " .. pialb_fallback)
+            os.execute("sleep " .. pialb_fallback)
         else
             WriteLog(master .. "Reboot signal received from PIALB()")
             break -- Reboot signal received
         end
     until pialb_fallback == 5
-    if pialb_fallback == 5 then
-        WriteLog(master .. "Error in PIALB() tree, exiting...")
-        return false
-    end
     WriteLog(master .. "Rebooting...")
-    WriteLog(bridge .. "CYCLE ------------}")
     luci.sys.reboot() -- 5 tries done, no success OR reboot signal received from child processes
 end)

@@ -1,0 +1,9 @@
+{
+    "login": "admin",
+    "password": "Artin.modem",
+    "db": "modem",
+    "db_model": "modem.profile",
+    "url_login": "http://89.252.165.116:8069/web/session/authenticate",
+    "url_read": "http://89.252.165.116:8069/web/dataset/search_read",
+    "url_write": "http://89.252.165.116:8069/create/create_or_update_record"
+}

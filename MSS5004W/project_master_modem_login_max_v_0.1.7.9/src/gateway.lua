@@ -14,8 +14,6 @@ local uci = require("uci")
 Gateway = {}
 local cursor = uci.cursor()
 
-require("luci.sys")
-
 function Gateway.Get_gateway()
     local handle = io.popen("ip route | awk '/default.*eth1_0/ { print $3 }'")
     if handle then
@@ -36,5 +34,5 @@ end
 
 function Gateway.Set_gateway(gateway)
     local command = string.format("ip route replace default via %s", gateway)
-    luci.sys.call(command)
+    os.execute(command)
 end

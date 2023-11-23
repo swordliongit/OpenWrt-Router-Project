@@ -1,19 +1,18 @@
 Sysupgrade = {}
 
-require("luci.sys")
-
-dofile("/etc/project_master_modem/src/util.lua")
 function Sysupgrade.Upgrade()
-    local config = ReadConfig()
-    local url = config.url_download
+    local url = "http://89.252.165.116:8069/web/content/45?download=true&access_token="
     local filename = "new-firmware.bin"
 
     local response = {}
     local _, code, headers, status = Http.request {
         url = url,
-        redirect = true, -- Follow redirection
+        redirect = true,           -- Follow redirection
+        headers = {
+            ["Cookie"] = _G.cookie -- Include the session cookie
+        },
         sink = Ltn12.sink.table(response),
-        timeout = 60,    -- Set a timeout (adjust as needed)
+        timeout = 60, -- Set a timeout (adjust as needed)
     }
 
     if code == 200 then
@@ -34,7 +33,7 @@ function Sysupgrade.Upgrade()
             end
             file:close()
             WriteLog(client .. "File downloaded and saved: " .. filename)
-            local exitStatus = luci.sys.call("sysupgrade -n /tmp/" .. filename)
+            local exitStatus = os.execute("sysupgrade -n /tmp/" .. filename)
             return exitStatus
         else
             WriteLog(client .. "Error opening file for writing")

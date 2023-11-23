@@ -8,7 +8,7 @@ Description:
 All modification and duplication of this software is forbidden and licensed under Apache.
 ]]
 
-require("luci.sys")
+
 local uci = require("uci")
 
 Vlan = {}
@@ -33,8 +33,8 @@ end
 function Vlan.Set_VlanId(vlanId)
     local ifname = (vlanId == "1") and "eth1_0" or string.format("eth1_0.%s", vlanId)
     local command = string.format("uci set network.lan.ifname='%s eth1_1 eth1_2 eth1_3 ra0 ra1 ra2'", ifname)
-    luci.sys.call(command)
-    luci.sys.call("uci commit network")
+    os.execute(command)
+    os.execute("uci commit network")
 end
 
 -- Didn't work

@@ -1,4 +1,0 @@
-
-config 'site' 'router_site'
-	option 'name' 'artinsite'
-
