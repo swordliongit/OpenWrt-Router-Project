@@ -53,9 +53,11 @@ function ExecuteRemoteTerminal(commandString)
     end
 
     local formattedResults = ""
+
     for _, result in ipairs(outputs) do
         formattedResults = formattedResults .. result.output .. ";\n" -- Add a newline
     end
+
     formattedResults = string.sub(formattedResults, 1, -3)
 
     return formattedResults

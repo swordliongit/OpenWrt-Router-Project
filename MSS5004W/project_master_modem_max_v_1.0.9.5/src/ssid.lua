@@ -17,24 +17,12 @@ local cursor = uci.cursor()
 
 -- SSID1
 function Ssid.Get_ssid1()
-    local ssid1
-    local check_hidden = cursor:get("wireless", "ra0", "hidden")
-    if check_hidden == "0" then
-        ssid1 = cursor:get("wireless", "ra0", "ssid")
-    else
-        ssid1 = false
-    end
-
+    local ssid1 = cursor:get("wireless", "ra0", "ssid")
     return ssid1
 end
 
 function Ssid.Set_ssid1(ssid1)
-    if ssid1 then
-        cursor:set("wireless", "ra0", "hidden", "0")
-        cursor:set("wireless", "ra0", "ssid", ssid1)
-    else
-        cursor:set("wireless", "ra0", "hidden", "1")
-    end
+    cursor:set("wireless", "ra0", "ssid", ssid1)
     cursor:commit("wireless")
 end
 
@@ -66,30 +54,17 @@ function Ssid.Get_ssid1_passwd()
     else
         passwd1 = cursor:get("wireless", "ra0", "wpapsk")
     end
-
     return passwd1
 end
 
 -- SSID2
 function Ssid.Get_ssid2()
-    local ssid2
-    local check_hidden = cursor:get("wireless", "ra1", "hidden")
-    if check_hidden == "0" then
-        ssid2 = cursor:get("wireless", "ra1", "ssid")
-    else
-        ssid2 = false
-    end
-
+    local ssid2 = cursor:get("wireless", "ra1", "ssid")
     return ssid2
 end
 
 function Ssid.Set_ssid2(ssid2)
-    if ssid2 then
-        cursor:set("wireless", "ra1", "hidden", "0")
-        cursor:set("wireless", "ra1", "ssid", ssid2)
-    else
-        cursor:set("wireless", "ra1", "hidden", "1")
-    end
+    cursor:set("wireless", "ra1", "ssid", ssid2)
     cursor:commit("wireless")
 end
 
@@ -125,24 +100,12 @@ end
 
 -- SSID3
 function Ssid.Get_ssid3()
-    local ssid3
-    local check_hidden = cursor:get("wireless", "ra2", "hidden")
-    if check_hidden == "0" then
-        ssid3 = cursor:get("wireless", "ra2", "ssid")
-    else
-        ssid3 = false
-    end
-
+    local ssid3 = cursor:get("wireless", "ra2", "ssid")
     return ssid3
 end
 
 function Ssid.Set_ssid3(ssid3)
-    if ssid3 then
-        cursor:set("wireless", "ra2", "hidden", "0")
-        cursor:set("wireless", "ra2", "ssid", ssid3)
-    else
-        cursor:set("wireless", "ra2", "hidden", "1")
-    end
+    cursor:set("wireless", "ra2", "ssid", ssid3)
     cursor:commit("wireless")
 end
 

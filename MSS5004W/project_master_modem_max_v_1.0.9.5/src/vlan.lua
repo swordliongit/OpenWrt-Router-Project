@@ -31,18 +31,10 @@ function Vlan.Get_VlanId()
 end
 
 function Vlan.Set_VlanId(vlanId)
-    -- Check if vlanId is a valid numeric string
-    local numericVlanId = tonumber(vlanId)
-    if not numericVlanId then
-        -- vlanId is not a valid numeric string
-        WriteLog(bridge .. "Invalid vlanId. Please provide a numeric string. Not changing.")
-        return false
-    end
     local ifname = (vlanId == "1") and "eth1_0" or string.format("eth1_0.%s", vlanId)
     local command = string.format("uci set network.lan.ifname='%s eth1_1 eth1_2 eth1_3 ra0 ra1 ra2'", ifname)
     luci.sys.call(command)
     luci.sys.call("uci commit network")
-    return true
 end
 
 -- Didn't work
