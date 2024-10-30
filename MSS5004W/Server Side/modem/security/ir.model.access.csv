@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_modem,modem.profile,model_modem_profile,,1,1,1,1
+access_modem_site,modem.profile.site,model_modem_profile_site,,1,1,1,1
+access_modem_wizard,modem.wizard,model_modem_wizard,,1,1,1,1
+access_modem_wizard_site,modem.wizard.site,model_modem_wizard_site,,1,1,1,1
+access_modem_wizard_specific,modem.wizard.specific,model_modem_wizard_specific,,1,1,1,1

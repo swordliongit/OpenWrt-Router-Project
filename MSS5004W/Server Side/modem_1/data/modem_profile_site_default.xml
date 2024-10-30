@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!-- <record id="default_site" model="modem.profile.site">
+            <field name="name">artinsite</field>
+            <field name="channel">auto</field>
+            <field name="enable_wireless">True</field>
+            <field name="enable_ssid1">True</field>
+            <field name="ssid1">artinwifi_1</field>
+            <field name="passwd_1"></field>
+            <field name="enable_ssid2">False</field>
+            <field name="ssid2">artinwifi_2</field>
+            <field name="passwd_2"></field>
+            <field name="enable_ssid3">False</field>
+            <field name="ssid3">artinwifi_3</field>
+            <field name="passwd_3"></field>
+            <field name="vlanId">1</field>
+        </record> -->
+    </data>
+</odoo>

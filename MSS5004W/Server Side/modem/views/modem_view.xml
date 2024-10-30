@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+  <!-- <record id="modem_profile_form_inherit" model="ir.ui.view">
+    <field name="name">modem.profile.form.inherit</field>
+    <field name="model">modem.profile</field>
+    <field name="inherit_id" ref="modem.modem_form_view" />
+    <field name="arch" type="xml">
+      <form position="inside">
+        <div class="o_partner_order_summary" colspan="2" />
+      </form>
+    </field>
+  </record> -->
+  <!-- <record id="modem_profile_form_inherit" model="ir.ui.view">
+    <field name="name">modem.profile.form.inherit</field>
+    <field name="model">modem.profile</field>
+    <field name="inherit_id" ref="modem.modem_form_view" />
+    <field name="arch" type="xml">
+        <field name="firmwareVersion" position="after">
+            <div class="o_partner_order_summary" colspan="2" />
+        </field>
+    </field>
+  </record> -->
+
+  <!--tree view of the model-->
+  <record id="modem_tree" model="ir.ui.view">
+    <field name="name">modem.profile.tree</field>
+    <field name="model">modem.profile</field>
+    <field name="arch" type="xml">
+      <tree string="modem" decoration-danger="lostConnection == True" editable="top" edit="false">
+        <header>
+          <!-- <field name="status" widget="statusbar"/> -->
+          <button name="%(modem.modem_wizard_action)d" string="Çoklu Değişiklik Yap" type="action"/>
+          <button name="%(modem.modem_wizard_site_action)d" string="Site Bilgisi Güncelle" type="action"/>
+          <button name="%(modem.modem_wizard_specific_action)d" string="Spesifik Alan Güncelle" type="action"/>
+        </header>
+        <!-- <button name="action_open_wizard" string="Wizard" type="object" class="oe_highlight"/> -->
+        <button readonly="True" string="" class="oe_inline oe_stat_button" icon="/web/content/409?download=true" attrs="{'invisible': [('modem_lock', '=', False)]}" type="object" name="gif_dummy"/>
+        <button readonly="True" string="" class="oe_inline oe_stat_button" icon="/web/content/410?download=true" attrs="{'invisible': [('modem_lock', '=', True)]}" type="object" name="gif_dummy"/>
+        <button readonly="True" string="Modem-Cloud Connection" class="oe_inline oe_stat_button" icon="/web/content/47?download=true" attrs="{'invisible': [('lostConnection', '=', True)]}" type="object" name="gif_dummy"/>
+        <button readonly="True" string="Modem-Cloud Connection" class="oe_inline oe_stat_button" icon="/web/content/46?download=true" attrs="{'invisible': [('lostConnection', '=', False)]}" type="object" name="gif_dummy"/>
+        <button readonly="True" string="WiFi" class="oe_inline oe_stat_button" icon="/web/content/48?download=true" attrs="{'invisible': [('enable_wireless', '=', False)]}" type="object" name="gif_dummy"/>
+        <button readonly="True" string="WiFi" class="oe_inline oe_stat_button" icon="/web/content/49?download=true" attrs="{'invisible': [('enable_wireless', '=', True)]}" type="object" name="gif_dummy"/>
+        <button readonly="True" string="" class="oe_inline oe_stat_button" icon="/web/content/709?download=true" attrs="{'invisible': [('show_warning', '=', False)]}" type="object" name="gif_dummy"/>
+        <field name="modem_lock" invisible="1"/>
+        <field name="context_changed" invisible="1"/>
+        <field name="show_warning" invisible="1"/>
+        <field name="lostConnection" groups="base.group_system,base.group_erp_manager" invisible="1"/>
+        <field name="last_heartbeat_date" invisible="1"/>
+        <field name="name"/>
+        <field name="site"/>
+        <field name="update_date" width="150px"/>
+        <field name="uptime"/>
+        <!-- <field name="wireless_status"/> -->
+        <field name="channel" width="150px"/>
+        <field name="mac"/>
+        <field name="ip"/>
+        <!-- <field name="subnet"/>
+        <field name="gateway"/> -->
+        <!-- <field name="dhcp_server"/>
+        <field name="dhcp_client" /> -->
+        <field name="enable_wireless" width="150px"/>
+        <field name="enable_ssid1" width="150px"/>
+        <field name="ssid1" width="50px"/>
+        <field name="passwd_1" width="150px"/>
+        <field name="enable_ssid2" width="150px"/>
+        <field name="ssid2" width="50px"/>
+        <field name="passwd_2" width="150px"/>
+        <field name="enable_ssid3" width="150px"/>
+        <field name="ssid3" width="50px"/>
+        <field name="passwd_3" width="150px"/>
+        <field name="vlanId" width="50px"/>
+        <field name="ram" widget="percentage"/>
+        <field name="cpu" widget="percentage"/>
+        <field name="disk" width="50px"/>
+        <field name="firmwareVersion" width="50px"/>
+        <!-- <field name="enable_ssid4"/> -->
+        <!-- <field name="ssid4"/> -->
+        <!-- <field name="passwd_4"/> -->
+        <!-- <field name="manual_time"/> -->
+      </tree>
+    </field>
+  </record>
+  <record id="modem_form_view" model="ir.ui.view">
+    <field name="name">modem.profile.form.view</field>
+    <field name="model">modem.profile</field>
+    <field name="arch" type="xml">
+      <form>
+        <header>
+              <button readonly="True" string="" id="dummy_button_1" class="oe_inline oe_stat_button" icon="/web/content/409?download=true" attrs="{'invisible': [('modem_lock', '=', False)]}" type="object" name="gif_dummy"/>
+              <button readonly="True" string="" id="dummy_button_2" class="oe_inline oe_stat_button" icon="/web/content/410?download=true" attrs="{'invisible': [('modem_lock', '=', True)]}" type="object" name="gif_dummy"/>
+              <button readonly="True" string="" id="dummy_button_3" class="oe_inline oe_stat_button" icon="/web/content/47?download=true" attrs="{'invisible': [('lostConnection', '=', True)]}" type="object" name="gif_dummy" style="width:5%%"/>
+              <button readonly="True" string="" id="dummy_button_4" class="oe_inline oe_stat_button" icon="/web/content/46?download=true" attrs="{'invisible': [('lostConnection', '=', False)]}" type="object" name="gif_dummy" style="width:5%%"/>
+              <button readonly="True" string="" id="dummy_button_5" class="oe_inline oe_stat_button" icon="/web/content/48?download=true" attrs="{'invisible': [('enable_wireless', '=', False)]}" type="object" name="gif_dummy" style="width:5%%"/>
+              <button readonly="True" string="" id="dummy_button_6" class="oe_inline oe_stat_button" icon="/web/content/49?download=true" attrs="{'invisible': [('enable_wireless', '=', True)]}" type="object" name="gif_dummy" style="width:5%%"/>
+              <button readonly="True" string="" id="dummy_button_7" icon="/web/content/692?download=true" attrs="{'invisible': [('show_warning', '=', False)]}" type="object" name="gif_dummy"/>
+        </header>
+        <sheet>
+          <group>  
+            <group>
+              <field name="context_changed" invisible="1"/>
+              <field name="show_warning" invisible="1" />
+              <field name="modem_lock" invisible="1" widget="boolean_toggle"/>
+              <field name="lostConnection" groups="base.group_system,base.group_erp_manager" invisible="1"/>
+              <field name="last_heartbeat_date" invisible="1"/>
+              <field name="name" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="site" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="update_date" readonly="1"/>
+              <field name="uptime" readonly="1"/>
+              <!-- <field name="wireless_status"/> -->
+              <field name="channel" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="mac" readonly="1"/>
+              <field name="device_info" readonly="1"/>
+              <field name="ip" readonly="1"/>
+              <!-- <field name="subnet" readonly="1"/>
+              <field name="gateway" readonly="1"/> -->
+              <field name="upgrade" attrs="{'readonly': [('modem_lock', '=', False)]}" groups="base.group_system,base.group_erp_manager, __export__.res_groups_19_bfb84905"/>
+              <!-- <field name="new_password"/> -->
+              <field name="reboot" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              
+            </group>
+            <group>
+              <!-- <field name="dhcp_server" widget="boolean_toggle"/>
+                            <field name="dhcp_client" widget="boolean_toggle" /> -->
+              <field name="enable_wireless" widget="boolean_toggle" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="enable_ssid1" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="ssid1" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="passwd_1" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="enable_ssid2" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="ssid2" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="passwd_2" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="enable_ssid3" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="ssid3" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="passwd_3" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="vlanId" attrs="{'readonly': [('modem_lock', '=', False)]}"/>
+              <field name="ram" readonly="1" widget="percentage"/>
+              <field name="cpu" readonly="1" widget="percentage"/>
+              <field name="disk" readonly="1"/>
+              <field name="log" readonly="1"/>
+              <field name="lastTimeLogTrimmed" readonly="1" groups="base.group_system,base.group_erp_manager"/>
+              <!-- <field name="advanced" widget="boolean_toggle"/> -->
+              <field name="terminal" attrs="{'readonly': [('modem_lock', '=', False)]}" groups="base.group_system,base.group_erp_manager"/>
+              <field name="monitor" readonly="1" groups="base.group_system,base.group_erp_manager"/>
+              <field name="firmwareVersion" readonly="1"/>
+              <!-- <field name="enable_ssid4"/> -->
+              <!-- <field name="ssid4"/> -->
+              <!-- <field name="passwd_4"/> -->
+              <!-- <field name="manual_time"/> -->
+            </group>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="modem_kanban" model="ir.ui.view">
+    <field name="name">modem.profile.kanban</field>
+    <field name="model">modem.profile</field>
+    <field name="arch" type="xml">
+      <kanban class="o_res_partner_kanban" sample="1">
+        <!-- <kanban class="o_res_partner_kanban" sample="1" default_order="ip desc"> -->
+        <!-- <field name="site"/>
+        <field name="mac"/>
+        <field name="ip"/> -->
+        <field name="lostConnection"/>
+        <field name="enable_wireless"/>
+        <templates>
+          <t t-name="kanban-box">
+            <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_res_partner_kanban">
+              <div class="oe_kanban_details d-flex flex-column">
+                <strong class="o_kanban_record_title oe_partner_heading">
+                  <div class="row justify-content-end mr-5">
+                    <div class="col-1 mr-5 mt-1">
+                      <!-- <img t-attf-src="#{kanban_image('translations.profile', 'translations_image', record.id.raw_value)}" alt="Image Description" style="height: 20px;"/> -->
+                    </div>
+                    <!-- groups="base.group_system,base.group_erp_manager,account.group_account_invoice" -->
+                    <div class="col-1 mr-1">
+                      <t t-if="record.lostConnection.raw_value == true">
+                        <img t-attf-src="https://modem.nitrawork.com/web/content/46?download=true" alt="Image Description" style="height: 50px;"/>
+                      </t>
+                      <t t-if="record.lostConnection.raw_value == false">
+                        <img t-attf-src="https://modem.nitrawork.com/web/content/47?download=true" alt="Image Description" style="height: 50px;"/>
+                      </t>
+                      <t t-if="record.enable_wireless.raw_value == true">
+                        <img t-attf-src="https://modem.nitrawork.com/web/content/48?download=true" alt="Image Description" style="height: 50px;"/>
+                      </t>
+                      <t t-if="record.enable_wireless.raw_value == false">
+                        <img t-attf-src="https://modem.nitrawork.com/web/content/49?download=true" alt="Image Description" style="height: 50px;"/>
+                      </t>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-12">
+                      <strong style="font-size: 20px; color: #1761A0;">
+                        <field name="name"/>
+                      </strong>
+                    </div>
+                  </div>
+                </strong>
+                <div class="o_kanban_tags_section oe_kanban_partner_categories"/>
+                <ul>
+                  <li>
+                    <strong>Site:</strong>
+                    <field name="site"/>
+                  </li>
+                  <li>
+                    <strong>WiFi:</strong>
+                    <field name="enable_wireless"/>
+                  </li>
+                  <li>
+                    <strong>Ip: </strong>
+                    <field name="ip"/>
+                  </li>
+                  <li>
+                    <strong>Mac: </strong>
+                    <field name="mac"/>
+                  </li>
+                  <li>
+                    <strong>VlanId: </strong>
+                    <field name="vlanId"/>
+                  </li>
+                  <li>
+                    <strong>RAM Usage: </strong>
+                    <field name="ram" widget="percentage"/>
+                  </li>
+                  <li>
+                    <strong>CPU Usage: </strong>
+                    <field name="cpu" widget="percentage"/>
+                  </li>
+                  <li>
+                    <strong>Disk Usage: </strong>
+                    <field name="disk"/>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+
+
+  <!-- Action to call the views-->
+  <record id="modem_action" model="ir.actions.act_window">
+    <field name="name">Modem</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">modem.profile</field>
+    <field name="view_mode">tree,form</field>
+  </record>
+  <!--  -->
+  <!--  -->
+  <!--  -->
+  <record id="site_tree" model="ir.ui.view">
+    <field name="name">modem.profile.site.tree</field>
+    <field name="model">modem.profile.site</field>
+    <field name="arch" type="xml">
+      <tree string="Site" editable="bottom">
+        <button string="Ayarları Uygula" icon="fa-check-square" type="object" class="btn-outline-success" name="apply_site_options"/>
+        <field name="name"/>
+        <field name="channel"/>
+        <field name="enable_wireless"/>
+        <field name="enable_ssid1"/>
+        <field name="ssid1"/>
+        <field name="passwd_1"/>
+        <field name="enable_ssid2"/>
+        <field name="ssid2"/>
+        <field name="passwd_2"/>
+        <field name="enable_ssid3"/>
+        <field name="ssid3"/>
+        <field name="passwd_3"/>
+        <field name="vlanId"/>
+      </tree>
+    </field>
+  </record>
+  <!-- Action to call the views-->
+  <record id="site_action" model="ir.actions.act_window">
+    <field name="name">Site</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">modem.profile.site</field>
+    <field name="view_mode">tree</field>
+  </record>
+
+
+  <menuitem id="modem_menu" name="Modem" sequence="4" action="modem_action" web_icon="modem,static/src/img/avatar.png"/>
+  <menuitem id="site_menu" name="Site" sequence="5" action="site_action" parent="modem_menu"/>
+
+
+  <!-- <record id="load_js_function" model="ir.actions.client">
+   <field name="name">Load JS Function</field>
+   <field name="tag">js_function</field>
+  </record>
+    <menuitem 
+      id="menu_reporting_config" 
+      name="Configuration" 
+      parent="modem_menu" 
+      action="load_js_function"
+      sequence="100" 
+      groups="base.group_system"
+  /> -->
+</odoo>

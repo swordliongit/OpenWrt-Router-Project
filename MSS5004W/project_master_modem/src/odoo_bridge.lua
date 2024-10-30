@@ -19,7 +19,7 @@ _G.Serror_backoff_counter = 0
 _G.MAX_SERROR = 10
 _G.Monitor = ""
 _G.Prev_Read_Accepted = true
-_G.CONTEXT = false -- to control if we should send write requests
+_G.CONTEXT_CHANGED = false -- to control if we should send write requests
 
 require("luci.sys")
 Http = require("socket.http")
@@ -445,6 +445,13 @@ local SendHeartbeat = function()
         else
             WriteLog(client .. "Receive " .. responseBody)
             -- return true, responseBody
+            local responseJson = Json.decode(responseBody)
+            local ctx_chnged = responseJson.result.context
+
+            if ctx_chnged then
+                _G.CONTEXT_CHANGED = true;
+                WriteLog(client .. "Context Changed")
+            end
         end
     else
         WriteLog(server ..
@@ -467,8 +474,9 @@ function Odoo_Connector()
     -- Main program loop
     while true do
         WriteLog(bridge .. "CYCLE ------------{")
+        -- SUBSCRIBE PHASE
         -- Keep trying to write ourselves into Odoo until successful
-        if CONTEXT or first_time_writing then
+        if CONTEXT_CHANGED or first_time_writing then
             backoff_counter = 5
             first_time_writing = false
             repeat
@@ -487,53 +495,53 @@ function Odoo_Connector()
             until write_completed
             luci.sys.call("echo 0 > /sys/class/leds/richerlink:green:system/brightness")
             write_completed = false
-            CONTEXT = false
+            CONTEXT_CHANGED = false
         end
 
         if reboot_required then
             break
         end
+
 
         luci.sys.call("sleep 15")
 
-        -- Keep trying to read data from Odoo until successful
-        backoff_counter = 5 -- Defensive counter against continous error cycles
-        repeat
-            read_completed, read_response = Odoo_Read()
-            if read_completed == false then
-                WriteLog(bridge .. "Read Backoff activated! Sleeping for " .. backoff_counter .. " seconds..")
-                luci.sys.call("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
-                luci.sys.call("sleep " .. tostring(backoff_counter))
-                backoff_counter = backoff_counter + 2
-                if backoff_counter >= 36 then
-                    reboot_required = true
-                    WriteLog(bridge .. "Read Backoff reboot signal received...")
-                    break
-                end
-            end
-        until read_completed
-        luci.sys.call("echo 0 > /sys/class/leds/richerlink:green:system/brightness")
+        if Ping(config.server_address) then
+            SendHeartbeat()
+        end
 
+        -- Keep trying to read data from Odoo until successful
+        if CONTEXT_CHANGED then
+            backoff_counter = 5 -- Defensive counter against continous error cycles
+            repeat
+                read_completed, read_response = Odoo_Read()
+                if read_completed == false then
+                    WriteLog(bridge .. "Read Backoff activated! Sleeping for " .. backoff_counter .. " seconds..")
+                    luci.sys.call("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
+                    luci.sys.call("sleep " .. tostring(backoff_counter))
+                    backoff_counter = backoff_counter + 2
+                    if backoff_counter >= 36 then
+                        reboot_required = true
+                        WriteLog(bridge .. "Read Backoff reboot signal received...")
+                        break
+                    end
+                end
+            until read_completed
+            luci.sys.call("echo 0 > /sys/class/leds/richerlink:green:system/brightness")
+        end
 
         if reboot_required then
             break
         end
 
-        -- Parse the read values and execute necessary modifications
-        local parse_results = BRIDGE_CHECK(Bridge_Parse, read_response)
-        if Bridge_Execute(parse_results) then
-            WriteLog(bridge .. "Reboot signal received from Parse()...")
-            break -- Reboot signal received, break
-        end
-        read_completed = false
-        WriteLog(bridge .. "CYCLE ------------}")
-
-        cycle_counter = cycle_counter + 1
-        if cycle_counter >= 2 then
-            if Ping(config.server_address) then
-                SendHeartbeat()
+        if CONTEXT_CHANGED then
+            -- Parse the read values and execute necessary modifications
+            local parse_results = BRIDGE_CHECK(Bridge_Parse, read_response)
+            if Bridge_Execute(parse_results) then
+                WriteLog(bridge .. "Reboot signal received from Parse()...")
+                break -- Reboot signal received, break
             end
-            cycle_counter = 0
+            read_completed = false
+            WriteLog(bridge .. "CYCLE ------------}")
         end
     end
 

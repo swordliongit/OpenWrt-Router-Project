@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<templates>
+    <t t-name="modem.button_template">
+        <button name="button" class="my_class" string="Call"/>
+    </t>
+</templates>

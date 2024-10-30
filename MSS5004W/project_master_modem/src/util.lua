@@ -387,11 +387,12 @@ function ReadBootCounter()
 end
 
 function BootChecker()
+    luci.sys.call("fw_setenv Image1Try 0")
+    luci.sys.call("fw_setenv Image2Try 0")
+    luci.sys.call("fw_setenv Image2Stable 1") -- our image is root zone 1
     IncrementBootCounter()
     if ReadBootCounter() < 2 then
         CronSetup()
-        luci.sys.call("fw_setenv Image1Try 0")
-        luci.sys.call("fw_setenv Image2Try 0")
         luci.sys.reboot()
         -- os.execute("reboot")
     end
@@ -412,7 +413,8 @@ end
 
 function CronSetup()
     local crontab_entry =
-    "*/20 * * * * /bin/ash /etc/project_master_modem/res/clear_log.sh" -- we run every 20 mins now 23.11.2023
+    "*/20 * * * * /bin/ash /etc/project_master_modem/res/clear_log.sh\n30 23 * * * sleep 70 && touch /etc/banner && reboot"
+    -- we run every 20 mins now 23.11.2023, we reboot every day at 4.30 am
     -- "0 * * * * /bin/ash /etc/project_master_modem/res/clear_log.sh" -- we run every hour now 23.10.2023
     -- "0 */2 * * * /bin/ash /etc/project_master_modem/clear_log.sh" -- We run every 2 hours
     local crontab_file = "/etc/crontabs/root" -- Location of the crontab file

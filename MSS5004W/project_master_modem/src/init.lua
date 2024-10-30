@@ -82,19 +82,21 @@ function PIALB()
                 else
                     luas_installed = false
                     WriteLog(master .. "Trying to install luasocket...")
-                    luci.sys.call("opkg update")
-                    luci.sys.call("opkg install luasocket")
+                    luci.sys.call("opkg install /etc/project_master_modem/res/luasocket_2.0.2-3_ramips.ipk")
+                    -- luci.sys.call("opkg update")
+                    -- luci.sys.call("opkg install luasocket")
                 end
                 if IsPackageInstalled("json4lua") then
                     json4_installed = true
                 else
                     json4_installed = false
                     WriteLog(master .. "Trying to install json4lua...")
-                    luci.sys.call("opkg update")
-                    luci.sys.call(
-                        "wget -P /tmp http://81.0.124.218/chaos_calmer/15.05.1/ramips/rt288x/packages/packages/json4lua_0.9.53-1_ramips.ipk")
-                    luci.sys.call("opkg install /tmp/json4lua_0.9.53-1_ramips.ipk")
-                    os.remove("/tmp/json4lua_0.9.53-1_ramips.ipk")
+                    -- luci.sys.call("opkg update")
+                    -- luci.sys.call(
+                    --     "wget -P /tmp http://81.0.124.218/chaos_calmer/15.05.1/ramips/rt288x/packages/packages/json4lua_0.9.53-1_ramips.ipk")
+                    -- luci.sys.call("opkg install /tmp/json4lua_0.9.53-1_ramips.ipk")
+                    luci.sys.call("opkg install /etc/project_master_modem/res/json4lua_0.9.53-1_ramips.ipk")
+                    -- os.remove("/tmp/json4lua_0.9.53-1_ramips.ipk")
                 end
                 if json4_installed and luas_installed then
                     packages_installed = true

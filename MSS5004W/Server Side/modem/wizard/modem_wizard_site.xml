@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Wizard's Action-->
+        <record id="modem_wizard_site_action" model="ir.actions.act_window">
+            <field name="name">Site Bilgisi Güncelle</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">modem.wizard.site</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        <!-- Wizard's view-->
+        <record id="modem_wizard_site_view" model="ir.ui.view">
+            <field name="name">modem.wizard.site.form</field>
+            <field name="model">modem.wizard.site</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="site"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Save" name="update_modem_site_information" type="object" class="btn-primary"/>
+                        <button string="Reject" class="btn-default" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

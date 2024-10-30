@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <!-- Wizard's Action-->
+        <record id="modem_wizard_action" model="ir.actions.act_window">
+            <field name="name">Çoklu Değişiklik Yap</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">modem.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{'default_active_id': active_id}</field>
+        </record>
+        <!-- Wizard's view-->
+        <record id="modem_wizard_view" model="ir.ui.view">
+            <field name="name">modem.wizard.form</field>
+            <field name="model">modem.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                <!-- <header>
+                    <script type="text/javascript">
+                        $(document).ready(function(){
+                            $('.modal-dialog').css({'max-width': '120%'});
+                            $('.modal-content').css({'max-width': '120%'});
+                        });
+                    </script>
+                </header> -->
+                    <group col="3">
+                        <group name="name" string="Genel Ayarlar"> 
+                            <field name="context_changed" invisible="1"/>
+                            <field name="show_warning" invisible="1" />
+                            <field name="modem_lock" invisible="1" widget="boolean_toggle"/>
+                            <field name="lostConnection" invisible="1"/>
+                            <field name="last_heartbeat_date" invisible="1"/>
+                            <field name="name" />
+                            <field name="site" />
+                            <field name="vlanId"/>
+                            <field name="terminal" groups="base.group_system,base.group_erp_manager"/>
+                            <field name="upgrade" widget="boolean_toggle" groups="base.group_system,base.group_erp_manager, __export__.res_groups_19_bfb84905"/>
+                            <field name="reboot" widget="boolean_toggle"/>
+                        </group>
+                        <group name="name" string="Wireless Ayarları">
+                            <field name="enable_wireless" widget="boolean_toggle"/>
+                            <field name="channel"/>
+                            <field name="enable_ssid1"/>
+                            <field name="ssid1"/>
+                            <field name="passwd_1"/>
+                            <field name="enable_ssid2"/>
+                            <field name="ssid2"/>
+                            <field name="passwd_2"/>
+                            <field name="enable_ssid3"/>
+                            <field name="ssid3"/>
+                            <field name="passwd_3"/>
+                        </group>
+                        <group name="name" string="Cihaz Bilgileri">
+                            <field name="ram" readonly="1" widget="percentage"/>
+                            <field name="cpu" readonly="1" widget="percentage"/>
+                            <field name="disk" readonly="1"/>
+                            <field name="update_date" readonly="1"/>
+                            <field name="uptime" readonly="1"/>
+                            <field name="mac" readonly="1"/>
+                            <field name="device_info" readonly="1"/>
+                            <field name="ip" readonly="1"/>
+                            <field name="lastTimeLogTrimmed" readonly="1" groups="base.group_system,base.group_erp_manager"/>
+                            <field name="firmwareVersion" readonly="1"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button string="Save" name="update_modem_information" type="object" id="test_button" class="btn-primary"/>
+                        <button string="Reject" class="btn-default" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

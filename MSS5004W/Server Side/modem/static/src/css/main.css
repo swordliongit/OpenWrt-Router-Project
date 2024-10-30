@@ -1,0 +1,44 @@
+/* Hide Discuss */
+.o_MessagingMenu.dropdown {
+    display: none !important;
+}
+/* Hide daily events */
+.o_mail_systray_item.dropdown {
+    display: none !important
+}
+/* Change Site apply button colors */
+.btn-outline-success {
+    background-color:lightseagreen !important;
+}
+/* remove paddings around the images of the header buttons */
+#dummy_button_1.btn {
+    border: none !important;
+    padding: 0px !important;
+}
+#dummy_button_2.btn {
+    border: none !important;
+    padding: 0px !important;
+}
+#dummy_button_3.btn {
+    border: none !important;
+    padding: 0px !important;
+}
+#dummy_button_4.btn {
+    border: none !important;
+    padding: 0px !important;
+}
+#dummy_button_5.btn {
+    border: none !important;
+    padding: 0px !important;
+}
+#dummy_button_6.btn {
+    border: none !important;
+    padding: 0px !important;
+}
+
+#dummy_button_7.btn {
+    border: none !important;
+    padding: 0px !important;
+    margin-left: 50px !important;
+    margin-bottom: 30px !important;
+}
