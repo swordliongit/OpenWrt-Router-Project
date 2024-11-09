@@ -309,11 +309,11 @@ local Bridge_Execute = function(parsed_values)
         pra_fail = true
     end
     -- WriteLog(bridge .. tostring(anything_changed) .. "After Execute")
-    if anything_changed then
-        CONTEXT = true
-    else
-        CONTEXT = false
-    end
+    -- if anything_changed then
+    --     CONTEXT = true
+    -- else
+    --     CONTEXT = false
+    -- end
 
     if need_upgrade then
         WriteLog("]", "wrapper_end")
@@ -452,14 +452,106 @@ local SendHeartbeat = function()
                 _G.CONTEXT_CHANGED = true;
                 WriteLog(client .. "Context Changed")
             end
+
+            return true
         end
     else
         WriteLog(server ..
             "Failed to send heartbeat. HTTP code: " .. tostring(code) .. "\nResponse body:\n" .. responseBody)
+        return false
         -- return false, responseBody
     end
 end
 
+local MAX_ATTEMPTS = {
+    internet = 40,
+    server = 40,
+    heartbeat = 40
+}
+local RETRY_DELAY = 5 -- seconds between retry attempts
+
+function TryConnectivity(config)
+    local attempts = {
+        internet = 0,
+        server = 0,
+        heartbeat = 0
+    }
+
+    WriteLog("Starting connectivity check sequence", "wrapper_start")
+
+    while attempts.internet < MAX_ATTEMPTS.internet do
+        -- First layer: Check internet connectivity
+        if HasInternet(config.ping_ip) then
+            WriteLog("Internet connectivity confirmed", "task")
+            attempts.internet = 0 -- Reset internet counter on success
+
+            -- Second layer: Check server connectivity
+            while attempts.server < MAX_ATTEMPTS.server do
+                if Ping(config.server_address) then
+                    WriteLog("Server ping successful", "task")
+                    attempts.server = 0 -- Reset server counter on success
+
+                    -- Third layer: Send heartbeat
+                    while attempts.heartbeat < MAX_ATTEMPTS.heartbeat do
+                        if SendHeartbeat() then
+                            WriteLog("Heartbeat successful", "task")
+                            attempts.heartbeat = 0 -- Reset heartbeat counter on success
+                            WriteLog("All connectivity checks passed", "wrapper_end")
+                            return true            -- All three layers succeeded
+                        else
+                            attempts.heartbeat = attempts.heartbeat + 1
+                            WriteLog(string.format("Heartbeat attempt %d of %d failed",
+                                attempts.heartbeat, MAX_ATTEMPTS.heartbeat), "task")
+                            luci.sys.call("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
+                            luci.sys.call("sleep 1")
+                            luci.sys.call("echo 0 > /sys/class/leds/richerlink:green:system/brightness")
+                            if attempts.heartbeat >= MAX_ATTEMPTS.heartbeat then
+                                WriteLog("Maximum heartbeat attempts reached. Entering wait state...", "task")
+                                -- Reset counter and continue trying
+                                attempts.heartbeat = 0
+                                luci.sys.call("sleep " .. tostring(RETRY_DELAY * 2))
+                            else
+                                luci.sys.call("sleep " .. tostring(RETRY_DELAY))
+                            end
+                        end
+                    end
+                else
+                    attempts.server = attempts.server + 1
+                    WriteLog(string.format("Server ping attempt %d of %d failed",
+                        attempts.server, MAX_ATTEMPTS.server), "task")
+
+                    for i = 1, 3 do
+                        luci.sys.call("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
+                        luci.sys.call("sleep 1")
+                        luci.sys.call("echo 0 > /sys/class/leds/richerlink:green:system/brightness")
+                    end
+
+
+                    if attempts.server >= MAX_ATTEMPTS.server then
+                        WriteLog("Maximum server ping attempts reached. Entering wait state...", "task")
+                        -- Reset counter and continue trying
+                        attempts.server = 0
+                        luci.sys.call("sleep " .. tostring(RETRY_DELAY * 2))
+                    else
+                        luci.sys.call("sleep " .. tostring(RETRY_DELAY))
+                    end
+                end
+            end
+        else
+            attempts.internet = attempts.internet + 1
+            WriteLog(string.format("Internet connectivity attempt %d of %d failed",
+                attempts.internet, MAX_ATTEMPTS.internet), "task")
+            luci.sys.call("echo 1 > /sys/class/leds/richerlink:green:system/brightness")
+
+            if attempts.internet >= MAX_ATTEMPTS.internet then
+                WriteLog("Maximum internet connectivity attempts reached. Initiating failsafe reboot...", "wrapper_end")
+                -- os.execute("reboot")
+                return false -- reboot signal
+            end
+            luci.sys.call("sleep " .. tostring(RETRY_DELAY))
+        end
+    end
+end
 
 function Odoo_Connector()
     local backoff_counter = 5
@@ -502,12 +594,14 @@ function Odoo_Connector()
             break
         end
 
-
         luci.sys.call("sleep 15")
 
-        if Ping(config.server_address) then
-            SendHeartbeat()
+
+        if not TryConnectivity(config) then
+            reboot_required = true
         end
+        luci.sys.call("echo 0 > /sys/class/leds/richerlink:green:system/brightness")
+
 
         -- Keep trying to read data from Odoo until successful
         if CONTEXT_CHANGED then
@@ -541,11 +635,12 @@ function Odoo_Connector()
                 break -- Reboot signal received, break
             end
             read_completed = false
-            WriteLog(bridge .. "CYCLE ------------}")
         end
+        WriteLog(bridge .. "CYCLE ------------}")
     end
 
     WriteLog(bridge .. "Elevating Reboot signal to PIALB()")
+
     return true
 end
 
